@@ -14,6 +14,7 @@ const Sidebar = () => {
   const pathname = usePathname();
 
   const menuItems = [
+    { name: "Úvod", href: "/" },
     { name: "Díla", href: "/galerie" },
     { name: "Výstavy", href: "/vystavy" },
     { name: "O mně", href: "/ja" },
@@ -65,7 +66,7 @@ const Sidebar = () => {
             </ul>
           </nav>
 
-          {/* Contact links and footer */}
+          {/* Contact links */}
           <div className="p-8 border-t border-gray-200 space-y-4">
             {/* Compact contact links */}
             <div className="space-y-3">
@@ -103,7 +104,7 @@ const Sidebar = () => {
       </aside>
 
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 w-full bg-white/90 backdrop-blur-sm z-40 border-b border-black">
+      <header className="lg:hidden fixed top-0 w-full bg-white/90 backdrop-blur-sm z-40 shadow safe-area-top">
         <div className="px-4 sm:px-6">
           <div className="flex justify-between items-center h-16">
             {/* Mobile Logo */}
@@ -156,25 +157,26 @@ const Sidebar = () => {
                 stiffness: 200,
                 duration: 0.3,
               }}
-              className="lg:hidden fixed right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-white z-50 border-l border-black shadow-2xl"
+              className="lg:hidden fixed right-0 top-0 bottom-0 w-80 max-w-[85vw] max-h-svh bg-white z-40 border-l border-black shadow-2xl safe-area-y safe-area-right"
             >
-              <div className="flex flex-col h-full">
-                {/* Header with Close Button */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                  <h2 className="text-2xl font-poppins font-medium tracking-tight text-black">
-                    Navigace
-                  </h2>
-                  <button
-                    onClick={() => setIsMenuOpen(false)}
-                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
-                    aria-label="Close menu"
-                  >
-                    <X size={20} />
-                  </button>
+              <div className="w-full h-full flex flex-col justify-between items-start bg-white/90 backdrop-blur-sm z-40 border-b border-black">
+                <div className="w-full shadow safe-area-top">
+                  <div className="h-16 flex items-center justify-between px-4 sm:px-6 ">
+                    <h2 className="text-xl font-poppins font-medium tracking-tight text-black">
+                      Menu
+                    </h2>
+                    <button
+                      onClick={() => setIsMenuOpen(false)}
+                      className=" text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+                      aria-label="Close menu"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Navigation Links */}
-                <nav className="flex-1 p-6">
+                <nav className="w-full flex-1 p-6">
                   <ul className="space-y-6">
                     {menuItems.map((item, index) => (
                       <motion.li
@@ -202,8 +204,8 @@ const Sidebar = () => {
                   </ul>
                 </nav>
 
-                {/* Contact and Footer */}
-                <div className="p-6 border-t border-gray-200 space-y-4">
+                {/* Contact */}
+                <div className="w-full p-6 border-t border-gray-200 space-y-4">
                   {/* Mobile contact links */}
                   <div className="space-y-3">
                     <div className="space-y-2">
@@ -235,7 +237,7 @@ const Sidebar = () => {
                       </a>
                     </div>
                   </div>
-                  <div className="pt-2 border-t border-gray-100">
+                  <div className="w-full pt-2 border-t border-gray-100 safe-area-bottom">
                     <p className="text-xs text-gray-500 font-inter font-light">
                       © {new Date().getFullYear()} Tereza Zichová
                     </p>

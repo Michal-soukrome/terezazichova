@@ -59,7 +59,7 @@ export default function Home() {
 
       {/* Gallery Preview */}
       <section className="py-12 lg:py-20 bg-white">
-        <div className="max-w-9/12 mx-auto px-6 lg:px-8">
+        <div className="max-w-11/12 md:max-w-9/12 mx-auto px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}

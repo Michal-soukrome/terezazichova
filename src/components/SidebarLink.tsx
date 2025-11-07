@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useLoading } from "./LoadingProvider";
 import { ReactNode, MouseEvent } from "react";
 
@@ -19,6 +19,7 @@ const SidebarLink = ({
   onClick,
 }: SidebarLinkProps) => {
   const router = useRouter();
+  const pathname = usePathname();
   const { startLoading } = useLoading();
 
   const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
@@ -27,6 +28,11 @@ const SidebarLink = ({
     // Close mobile menu if onClick is provided
     if (onClick) {
       onClick();
+    }
+
+    // Don't start loading if we're already on this page
+    if (pathname === href) {
+      return;
     }
 
     // Start loading for the content area

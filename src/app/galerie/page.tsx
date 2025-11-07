@@ -84,7 +84,7 @@ export default function Gallery() {
 
   return (
     <div className="min-h-screen py-12 lg:py-20 bg-white">
-      <div className="max-w-9/12 mx-auto px-6 lg:px-8">
+      <div className="max-w-11/12 md:max-w-9/12 mx-auto px-6 lg:px-8">
         {/* Masonry-style grid */}
         <motion.div
           className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4"

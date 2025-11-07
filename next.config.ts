@@ -2,6 +2,15 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  // Ensure we're not exporting as static site
+  output: undefined, // This ensures dynamic routing works
+  trailingSlash: false,
+
+  // Optimize for production
+  poweredByHeader: false,
+  generateEtags: false,
+
+  // Image optimization
   images: {
     formats: ["image/webp", "image/avif"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -13,6 +22,11 @@ const nextConfig: NextConfig = {
     ],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
+
+  // Enable experimental features if needed
+  experimental: {
+    optimizePackageImports: ["lucide-react", "framer-motion"],
   },
 };
 
