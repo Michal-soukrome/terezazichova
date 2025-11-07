@@ -1,10 +1,15 @@
-# Minimal Netlify configuration for Next.js
-# Netlify auto-detects Next.js and uses OpenNext adapter
-
+# Netlify configuration for Next.js static export
 [build]
   command = "npm run build"
+  publish = "out"
 
 # Environment settings  
 [build.environment]
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
+
+# Handle client-side routing for SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

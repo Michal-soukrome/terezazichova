@@ -6,8 +6,6 @@ import Link from "next/link";
 import { Menu, X, Instagram, Mail, Phone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import SidebarLink from "./SidebarLink";
-import LoadingLink from "./LoadingLink";
-import { get } from "http";
 
 const Sidebar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,7 +13,6 @@ const Sidebar = () => {
 
   const menuItems = [
     { name: "Úvod", href: "/" },
-    { name: "Díla", href: "/galerie" },
     { name: "Výstavy", href: "/vystavy" },
     { name: "O mně", href: "/ja" },
   ];

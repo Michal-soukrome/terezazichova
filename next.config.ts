@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  // Ensure we're not exporting as static site
-  output: undefined, // This ensures dynamic routing works
+  // Use static export since all pages are static
+  output: "export",
   trailingSlash: false,
 
   // Optimize for production
