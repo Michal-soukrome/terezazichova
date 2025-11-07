@@ -6,7 +6,7 @@ export default function About() {
   return (
     <div className="min-h-screen py-12 lg:py-20 bg-white">
       <div className="absolute inset-0 pointer-events-none opacity-75 bg-grid-pattern"></div>
-      <div className="max-w-11/12 md:max-w-9/12 max-w-11/12 mx-auto px-3 lg:px-8 relative z-10">
+      <div className="max-w-11/12 md:max-w-9/12  mx-auto px-3 lg:px-8 relative z-10">
         {/* Artist image and bio */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start mb-20">
           {/* Artist Photo */}
@@ -16,7 +16,7 @@ export default function About() {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="relative"
           >
-            <div className="aspect-4/5 bg-black overflow-hidden border border-black">
+            <div className="aspect-4/5 bg-black overflow-hidden ">
               <div className="w-full h-full bg-black flex items-center justify-center">
                 <p className="text-white text-lg">Portrét umělkyně</p>
               </div>

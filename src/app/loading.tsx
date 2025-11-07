@@ -88,7 +88,7 @@ export default function Loading() {
             ease: "easeInOut",
           }}
         >
-          <div className="w-full h-full border border-black bg-transparent"></div>
+          <div className="w-full h-full  bg-transparent"></div>
         </motion.div> */}
 
         <motion.p

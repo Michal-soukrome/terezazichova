@@ -2,8 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  // Use static export since all pages are static
-  output: "export",
   trailingSlash: false,
 
   // Optimize for production

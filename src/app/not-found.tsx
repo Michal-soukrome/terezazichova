@@ -25,7 +25,7 @@ export default function NotFound() {
           >
             <Link
               href="/"
-              className="inline-block px-8 py-3 border border-black text-black hover:bg-black hover:text-white transition-all duration-300 font-inter font-medium tracking-wide"
+              className="inline-block px-8 py-3  text-black hover:bg-black hover:text-white transition-all duration-300 font-inter font-medium tracking-wide"
             >
               Zpět na hlavní stránku
             </Link>

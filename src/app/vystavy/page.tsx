@@ -183,7 +183,7 @@ export default function Exhibitions() {
   return (
     <div className="min-h-screen py-12 lg:py-20 bg-white">
       <div className="absolute inset-0 pointer-events-none opacity-75 bg-dot-pattern"></div>
-      <div className="max-w-11/12 md:max-w-9/12 max-w-11/12 mx-auto px-3 lg:px-8 relative z-10">
+      <div className="max-w-11/12 md:max-w-9/12  mx-auto px-3 lg:px-8 relative z-10">
         {/* Education Section */}
         <motion.section
           initial={{ opacity: 0, y: 30 }}
