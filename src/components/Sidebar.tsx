@@ -53,109 +53,100 @@ const Sidebar = () => {
     <>
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex lg:flex-col lg:w-80 lg:fixed lg:inset-y-0 lg:z-50 lg:bg-white lg:border-r lg:border-gray-200">
-        <div className="flex flex-col h-full">
-          {/* Logo/Name */}
-          <div className="p-8 border-b border-gray-200">
-            <SidebarLink href="/" className="group block">
-              <div className="flex items-center space-x-3">
-                {/* Custom SVG Paintbrush with left-to-right fill animation */}
+        <div className="flex flex-col h-full  ">
+          {/* Logo/Name */}{" "}
+          <SidebarLink href="/">
+            <div className="p-8 border-b border-gray-200 group">
+              {/* Custom SVG Paintbrush with left-to-right fill animation */}
+
+              <div className="group relative inline-block">
+                <h1 className="text-3xl font-poppins font-medium tracking-tight text-black leading-none relative z-10">
+                  Tereza Zichová
+                </h1>
+                <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-black transition-all duration-500 group-hover:w-full"></span>
+              </div>
+              <div className="flex items-center gap-1 mt-1">
                 <div className="relative shrink-0">
                   {/* Base SVG (outline) */}
                   <svg
-                    width="32"
-                    height="32"
+                    width="20"
+                    height="20"
                     viewBox="0 0 32 32"
                     xmlns="http://www.w3.org/2000/svg"
                   >
+                    {/* Palette */}
                     <path
-                      d="M8 26L6 28C5.5 28.5 4.5 28.5 4 28C3.5 27.5 3.5 26.5 4 26L6 24L8 26Z"
+                      d="M16 4C9.4 4 4 9.4 4 16C4 19.5 5.5 22.6 8 24.5C8.8 25.1 10 24.5 10 23.5V23C10 21.9 10.9 21 12 21C13.1 21 14 21.9 14 23C14 26.3 16.7 29 20 29C25.5 29 30 24.5 30 19C30 10.7 23.7 4 16 4Z"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="1.5"
-                      className="text-gray-400 group-hover:text-black transition-colors duration-300"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-gray-400 group-hover:text-black transition-colors duration-100"
                     />
-                    <rect
-                      x="6"
-                      y="18"
-                      width="4"
-                      height="8"
-                      rx="0.5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      className="text-gray-400 group-hover:text-black transition-colors duration-300"
+                    {/* Paint dots */}
+                    <circle
+                      cx="12"
+                      cy="11"
+                      r="1.5"
+                      fill="currentColor"
+                      className="text-gray-400 group-hover:text-black transition-colors duration-100"
                     />
-                    <path
-                      d="M7 18V14C7 12.5 7.5 11 9 10C10.5 9 11.5 8 13 7C15 5.5 17 4 20 4C23 4 26 6 28 9C28.5 9.5 28.5 10.5 28 11L25 14C24 15 23 15.5 22 16L15 17C12 17.5 9 17.5 7 18Z"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      className="text-gray-300 group-hover:text-black transition-colors duration-300"
+                    <circle
+                      cx="20"
+                      cy="10"
+                      r="1.5"
+                      fill="currentColor"
+                      className="text-gray-400 group-hover:text-black transition-colors duration-100"
                     />
-                    <path
-                      d="M20 8C21 7 22.5 7.5 23 9C23.5 10.5 22.5 11.5 21 11C20 11.5 19.5 10 20 8Z"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      className="text-gray-300 group-hover:text-black transition-colors duration-300"
+                    <circle
+                      cx="22"
+                      cy="16"
+                      r="1.5"
+                      fill="currentColor"
+                      className="text-gray-400 group-hover:text-black transition-colors duration-100"
+                    />
+                    <circle
+                      cx="12"
+                      cy="16"
+                      r="1.5"
+                      fill="currentColor"
+                      className="text-gray-400 group-hover:text-black transition-colors duration-100"
                     />
                   </svg>
 
                   {/* Filled SVG (animated clip) */}
                   <svg
-                    width="32"
-                    height="32"
+                    width="20"
+                    height="20"
                     viewBox="0 0 32 32"
                     className="absolute inset-0 group-hover:animate-fill-left-to-right"
                     style={{
                       clipPath: "inset(0 100% 0 0)",
-                      transition: "clip-path 800ms ease-out",
+                      transition: "clip-path 300ms ease-out",
                     }}
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M8 26L6 28C5.5 28.5 4.5 28.5 4 28C3.5 27.5 3.5 26.5 4 26L6 24L8 26Z"
+                      d="M16 4C9.4 4 4 9.4 4 16C4 19.5 5.5 22.6 8 24.5C8.8 25.1 10 24.5 10 23.5V23C10 21.9 10.9 21 12 21C13.1 21 14 21.9 14 23C14 26.3 16.7 29 20 29C25.5 29 30 24.5 30 19C30 10.7 23.7 4 16 4Z"
                       fill="black"
                       stroke="black"
                       strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
-                    <rect
-                      x="6"
-                      y="18"
-                      width="4"
-                      height="8"
-                      rx="0.5"
-                      fill="black"
-                      stroke="black"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M7 18V14C7 12.5 7.5 11 9 10C10.5 9 11.5 8 13 7C15 5.5 17 4 20 4C23 4 26 6 28 9C28.5 9.5 28.5 10.5 28 11L25 14C24 15 23 15.5 22 16L15 17C12 17.5 9 17.5 7 18Z"
-                      fill="black"
-                      stroke="black"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M20 8C21 7 22.5 7.5 23 9C23.5 10.5 22.5 11.5 21 11C20 11.5 19.5 10 20 8Z"
-                      fill="black"
-                      stroke="black"
-                      strokeWidth="1.5"
-                    />
+                    <circle cx="12" cy="11" r="1.5" fill="white" />
+                    <circle cx="20" cy="10" r="1.5" fill="white" />
+                    <circle cx="22" cy="16" r="1.5" fill="white" />
+                    <circle cx="12" cy="16" r="1.5" fill="white" />
                   </svg>
                 </div>
-
-                <div>
-                  <h1 className="text-3xl font-poppins font-medium tracking-tight text-black group-hover:text-gray-600 transition-colors leading-none">
-                    Tereza Zichová
-                  </h1>
-                </div>
+                <p className="text-gray-600 text-sm font-inter font-light tracking-wide">
+                  malba, kresba, grafika
+                </p>
               </div>
-            </SidebarLink>
-            <p className="text-gray-600 text-sm mt-3 font-inter font-light tracking-wide">
-              malba, kresba, grafika
-            </p>
-          </div>
-
+            </div>{" "}
+          </SidebarLink>{" "}
           {/* Navigation */}
           <nav className="flex-1 px-8 py-12">
             <ul className="space-y-2">
@@ -183,34 +174,42 @@ const Sidebar = () => {
               ))}
             </ul>
           </nav>
-
           {/* Contact links */}
           <div className="p-8 border-t border-gray-200 space-y-4">
             {/* Compact contact links */}
             <div className="space-y-3">
-              <div className="space-y-2">
+              <div className="space-y-2 ">
                 <a
                   href="mailto:tereza.zich@email.cz"
                   className="group flex items-center space-x-3 text-xs text-gray-600 hover:text-black transition-colors"
                 >
                   <AnimatedIcon icon={Mail} size={16} duration={600} />
-                  <span>tereza.zich@email.cz</span>
+                  <span className="relative">
+                    tereza.zich@email.cz
+                    <span className="absolute left-0 bottom-0 w-0 h-px bg-gray-400 transition-all duration-500 group-hover:w-full"></span>
+                  </span>
                 </a>
                 <a
                   href="tel:+420777221469"
-                  className="flex items-center space-x-3 text-xs text-gray-600 hover:text-black transition-colors"
+                  className="group flex items-center space-x-3 text-xs text-gray-600 hover:text-black transition-colors"
                 >
                   <Phone className="w-4 h-4" />
-                  <span>+420 777 221 469</span>
+                  <span className="relative">
+                    +420 777 221 469
+                    <span className="absolute left-0 bottom-0 w-0 h-px bg-gray-400 transition-all duration-500 group-hover:w-full"></span>
+                  </span>
                 </a>
                 <a
                   href="https://www.instagram.com/zichovatereza/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-3 text-xs text-gray-600 hover:text-black transition-colors"
+                  className="group flex items-center space-x-3 text-xs text-gray-600 hover:text-black transition-colors"
                 >
                   <Instagram className="w-4 h-4" />
-                  <span>@zichovatereza</span>
+                  <span className="relative">
+                    zichovatereza{" "}
+                    <span className="absolute left-0 bottom-0 w-0 h-px bg-gray-400 transition-all duration-500 group-hover:w-full"></span>
+                  </span>
                 </a>
               </div>
             </div>
@@ -231,8 +230,8 @@ const Sidebar = () => {
               <div className="relative shrink-0">
                 {/* Base SVG (outline) */}
                 <svg
-                  width="24"
-                  height="24"
+                  width="20"
+                  height="20"
                   viewBox="0 0 32 32"
                   className="absolute inset-0"
                   xmlns="http://www.w3.org/2000/svg"
@@ -273,13 +272,13 @@ const Sidebar = () => {
 
                 {/* Filled SVG (animated clip) */}
                 <svg
-                  width="24"
-                  height="24"
+                  width="20"
+                  height="20"
                   viewBox="0 0 32 32"
                   className="absolute inset-0 group-hover:animate-fill-left-to-right"
                   style={{
                     clipPath: "inset(0 100% 0 0)",
-                    transition: "clip-path 800ms ease-out",
+                    transition: "clip-path 300ms ease-out",
                   }}
                   xmlns="http://www.w3.org/2000/svg"
                 >
