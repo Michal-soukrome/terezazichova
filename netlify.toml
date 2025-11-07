@@ -1,6 +1,7 @@
 # Netlify configuration for Next.js dynamic app
 [build]
   command = "npm run build"
+  publish = "netlify"
 
 # Use the official Next.js plugin for dynamic features and edge functions
 [[plugins]]
