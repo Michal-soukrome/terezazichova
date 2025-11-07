@@ -83,8 +83,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen py-12 lg:py-20 bg-white">
-      <div className="max-w-11/12 mx-auto px-6 lg:px-8">
+    <div className="min-h-screen py-5 lg:py-20 bg-white relative">
+      {/* Subtle grid background */}
+      <div className="absolute inset-0 pointer-events-none opacity-75 bg-blueprint-pattern"></div>
+      <div className="max-w-11/12 mx-auto px-3 lg:px-8 relative z-10">
         {/* Masonry-style grid */}
         <motion.div
           className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4"

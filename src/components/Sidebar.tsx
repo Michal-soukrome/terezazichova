@@ -20,7 +20,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-80 lg:fixed lg:inset-y-0 lg:z-50 lg:bg-white lg:border-r lg:border-black">
+      <aside className="hidden lg:flex lg:flex-col lg:w-80 lg:fixed lg:inset-y-0 lg:z-50 lg:bg-white lg:border-r lg:border-gray-200">
         <div className="flex flex-col h-full">
           {/* Logo/Name */}
           <div className="p-8 border-b border-gray-200">
@@ -52,11 +52,11 @@ const Sidebar = () => {
                     {pathname === item.href && (
                       <motion.div
                         layoutId="sidebar-active"
-                        className="absolute -left-8 top-0 bottom-0 w-1 bg-black"
+                        className="absolute -right-8 top-0 bottom-0 w-0.75 bg-gray-400"
                         initial={false}
                       />
                     )}
-                    <span className="absolute -left-8 top-0 bottom-0 w-1 bg-gray-300 scale-y-0 group-hover:scale-y-100 transition-transform origin-top duration-300" />
+                    <span className="absolute -right-8 top-0 bottom-0 w-0.75 bg-gray-300 scale-y-0 group-hover:scale-y-100 transition-transform origin-top duration-300" />
                   </SidebarLink>
                 </li>
               ))}

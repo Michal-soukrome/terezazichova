@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 export default function About() {
   return (
     <div className="min-h-screen py-12 lg:py-20 bg-white">
-      <div className="max-w-11/12 md:max-w-9/12 mx-auto px-6 lg:px-8">
+      <div className="absolute inset-0 pointer-events-none opacity-75 bg-grid-pattern"></div>
+      <div className="max-w-11/12 md:max-w-9/12 max-w-11/12 mx-auto px-3 lg:px-8 relative z-10">
         {/* Artist image and bio */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start mb-20">
           {/* Artist Photo */}

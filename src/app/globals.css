@@ -58,3 +58,30 @@ h6 {
   font-family: var(--font-poppins), system-ui, sans-serif;
   letter-spacing: -0.025em;
 }
+
+/* Subtle grid background pattern */
+.bg-grid-pattern {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Alternative dot grid pattern */
+.bg-dot-pattern {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(0, 0, 0, 0.04) 1px,
+    transparent 0
+  );
+  background-size: 30px 30px;
+}
+
+/* Blueprint style grid */
+.bg-blueprint-pattern {
+  background-color: #f8f9fa;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    linear-gradient(rgba(0, 0, 0, 0.01) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.01) 1px, transparent 1px);
+  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+}
