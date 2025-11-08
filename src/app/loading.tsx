@@ -97,7 +97,7 @@ export default function Loading() {
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           className="text-gray-600 font-inter font-light text-sm tracking-[0.2em] uppercase"
         >
-          Loading
+          Načítám...
         </motion.p>
       </div>
     </div>

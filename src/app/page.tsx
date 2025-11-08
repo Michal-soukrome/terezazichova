@@ -24,6 +24,19 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedExhibition, setSelectedExhibition] = useState<string>("all");
 
+  // Filter bar scroll state
+  const [showFilterBar, setShowFilterBar] = useState(false);
+
+  // Mobile detection for compact filters
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   // Filter artworks based on selected filters
   const filteredArtworks = artworks.filter((artwork) => {
     const yearMatch = selectedYear === null || artwork.year === selectedYear;
@@ -172,6 +185,27 @@ export default function Home() {
     setTouchEnd(null);
   };
 
+  // Show filter bar on scroll or after delay
+  useEffect(() => {
+    // Option 1: Show immediately after a delay (uncomment to use)
+    const timer = setTimeout(() => setShowFilterBar(true), 2000);
+    return () => clearTimeout(timer);
+
+    // Option 2: Show on scroll (current - adjust threshold below)
+    // const SCROLL_THRESHOLD = 100; // Adjust this value (in pixels)
+
+    const handleScroll = () => {
+      if (window.scrollY > SCROLL_THRESHOLD) {
+        setShowFilterBar(true);
+      } else {
+        setShowFilterBar(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   // Disable body scroll when lightbox is open
   useEffect(() => {
     if (selectedImageIndex !== null) {
@@ -205,75 +239,6 @@ export default function Home() {
       {/* Subtle grid background */}
       <div className="absolute inset-0 pointer-events-none opacity-75 bg-blueprint-pattern"></div>
       <div className="max-w-11/12 mx-auto px-3 lg:px-8 relative z-10">
-        {/* Filter Controls */}
-        <motion.div
-          className="mb-8 space-y-4"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="flex flex-wrap gap-4 items-center">
-            {/* Year Filter */}
-            <div className="flex items-center space-x-2">
-              <label className="text-sm font-inter font-medium text-gray-700">
-                Rok:
-              </label>
-              <select
-                value={selectedYear || ""}
-                onChange={(e) =>
-                  setSelectedYear(
-                    e.target.value ? parseInt(e.target.value) : null
-                  )
-                }
-                className="px-3 py-1 text-sm border border-gray-300 rounded bg-white hover:border-gray-400 transition-colors"
-              >
-                <option value="">Všechny</option>
-                {uniqueYears.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Category Filter */}
-            <div className="flex items-center space-x-2">
-              <label className="text-sm font-inter font-medium text-gray-700">
-                Styl:
-              </label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-1 text-sm border border-gray-300 rounded bg-white hover:border-gray-400 transition-colors"
-              >
-                <option value="all">Všechny</option>
-                <option value="traditional">Tradiční</option>
-                <option value="non-traditional">Netradiční</option>
-                <option value="minimalistic">Minimalistické</option>
-              </select>
-            </div>
-
-            {/* Exhibition Filter */}
-            <div className="flex items-center space-x-2">
-              <label className="text-sm font-inter font-medium text-gray-700">
-                Výstava:
-              </label>
-              <select
-                value={selectedExhibition}
-                onChange={(e) => setSelectedExhibition(e.target.value)}
-                className="px-3 py-1 text-sm border border-gray-300 rounded bg-white hover:border-gray-400 transition-colors"
-              >
-                <option value="all">Všechny</option>
-                {uniqueExhibitions.map((exhibition) => (
-                  <option key={exhibition} value={exhibition}>
-                    {exhibition}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </motion.div>
-
         {/* Masonry-style grid */}
         <motion.div
           className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4"
@@ -454,6 +419,111 @@ export default function Home() {
           </div>
         </motion.div>
       )}
+
+      {/* Floating Glass Filter Pill */}
+      <motion.div
+        initial={{ y: 100, opacity: 0, scale: 0.95 }}
+        animate={{
+          y: showFilterBar ? 0 : 100,
+          opacity: showFilterBar ? 1 : 0,
+          scale: showFilterBar ? 1 : 0.95,
+        }}
+        transition={{ type: "spring", damping: 20, stiffness: 150 }}
+        className="fixed bottom-0 md:bottom-10 left-1/2 lg:left-[calc(50%+10rem)] transform -translate-x-1/2 z-30 w-full md:w-fit max-w-full md:max-w-2xl px-2 md:px-0"
+      >
+        <div className="backdrop-blur-2xl bg-white/70 border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-3xl p-2 md:p-5 hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-shadow duration-300">
+          <div className="flex flex-nowrap gap-2 items-center justify-center w-full overflow-hidden">
+            {/* Year Filter */}
+            <div className="relative">
+              <select
+                value={selectedYear || ""}
+                onChange={(e) =>
+                  setSelectedYear(
+                    e.target.value ? parseInt(e.target.value) : null
+                  )
+                }
+                className={`cursor-pointer px-4 py-2.5 pr-8 text-sm border border-gray-200/60 rounded-2xl bg-white/60 backdrop-blur hover:bg-white/80 hover:border-gray-300 transition-all focus:ring-2 focus:ring-gray-400 focus:outline-none font-inter shadow-sm ${
+                  isMobile ? "w-28" : "w-auto"
+                }`}
+              >
+                <option value="">Kdy?</option>
+                {uniqueYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+              {isMobile && (
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                  <svg
+                    className="fill-current h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                  </svg>
+                </div>
+              )}
+            </div>
+
+            {/* Category Filter */}
+            <div className="relative">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className={`cursor-pointer px-4 py-2.5 pr-8 text-sm border border-gray-200/60 rounded-2xl bg-white/60 backdrop-blur hover:bg-white/80 hover:border-gray-300 transition-all focus:ring-2 focus:ring-gray-400 focus:outline-none font-inter shadow-sm ${
+                  isMobile ? "w-28" : "w-auto"
+                }`}
+              >
+                <option value="all">Co?</option>
+                <option value="traditional">Tradiční</option>
+                <option value="non-traditional">Netradiční</option>
+                <option value="minimalistic">Minimalistické</option>
+              </select>
+              {isMobile && (
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                  <svg
+                    className="fill-current h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                  </svg>
+                </div>
+              )}
+            </div>
+
+            {/* Exhibition Filter */}
+            <div className="relative">
+              <select
+                value={selectedExhibition}
+                onChange={(e) => setSelectedExhibition(e.target.value)}
+                className={`cursor-pointer px-4 py-2.5 pr-8 text-sm border border-gray-200/60 rounded-2xl bg-white/60 backdrop-blur hover:bg-white/80 hover:border-gray-300 transition-all focus:ring-2 focus:ring-gray-400 focus:outline-none font-inter shadow-sm ${
+                  isMobile ? "w-24" : "w-auto"
+                }`}
+              >
+                <option value="all">Kde?</option>
+                {uniqueExhibitions.map((exhibition) => (
+                  <option key={exhibition} value={exhibition}>
+                    {exhibition}
+                  </option>
+                ))}
+              </select>
+              {isMobile && (
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                  <svg
+                    className="fill-current h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

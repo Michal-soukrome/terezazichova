@@ -4,6 +4,9 @@ import "./globals.css";
 import Sidebar from "../components/Sidebar";
 import { LoadingProvider } from "../components/LoadingProvider";
 import ContentWrapper from "../components/ContentWrapper";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -75,6 +78,13 @@ export const metadata: Metadata = {
       "Grafika, malba, kresba. Jsem Tereza Zichová a ráda vás vítám na mém webu, který se zaměřuje na mou tvorbu. Tak se pojďte podívat!",
     images: ["/images/og-image.jpg"],
   },
+  manifest: "/manifest.json",
+  themeColor: "#000000",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Tereza Zichová",
+  },
 };
 
 export default function RootLayout({
@@ -108,6 +118,9 @@ export default function RootLayout({
             </div>
           </div>
         </LoadingProvider>
+        <Analytics />
+        <SpeedInsights />
+        <GoogleTagManager gtmId="GTM-5PD8635G" />
       </body>
     </html>
   );
