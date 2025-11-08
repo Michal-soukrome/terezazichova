@@ -81,6 +81,9 @@ export default function TvorbaPage() {
     [key: number]: boolean;
   }>({});
   const [lightboxImageLoaded, setLightboxImageLoaded] = useState(false);
+  const [preloadedImages, setPreloadedImages] = useState<Set<string>>(
+    new Set()
+  );
 
   // Swipe down to close state
   const [swipeDownOffset, setSwipeDownOffset] = useState(0);
@@ -126,6 +129,42 @@ export default function TvorbaPage() {
 
   const selectedImage =
     selectedImageIndex !== null ? filteredItems[selectedImageIndex] : null;
+
+  // Preload all filtered images aggressively
+  useEffect(() => {
+    filteredItems.forEach((item) => {
+      if (!preloadedImages.has(item.image)) {
+        const img = document.createElement("img");
+        img.src = item.image;
+        img.onload = () => {
+          setPreloadedImages((prev) => new Set(prev).add(item.image));
+        };
+      }
+    });
+  }, [filteredItems, preloadedImages]);
+
+  // Preload adjacent images when lightbox opens
+  useEffect(() => {
+    if (selectedImageIndex !== null) {
+      // Preload previous and next images
+      const preloadIndexes = [
+        selectedImageIndex - 1,
+        selectedImageIndex,
+        selectedImageIndex + 1,
+      ].filter((i) => i >= 0 && i < filteredItems.length);
+
+      preloadIndexes.forEach((index) => {
+        const item = filteredItems[index];
+        if (item && !preloadedImages.has(item.image)) {
+          const img = document.createElement("img");
+          img.src = item.image;
+          img.onload = () => {
+            setPreloadedImages((prev) => new Set(prev).add(item.image));
+          };
+        }
+      });
+    }
+  }, [selectedImageIndex, filteredItems, preloadedImages]);
 
   // Track image loading states
   const handleImageLoad = (index: number) => {
@@ -289,17 +328,7 @@ export default function TvorbaPage() {
                 setLightboxImageLoaded(false);
               }}
             >
-              {/* Blur placeholder while loading */}
-              {!imageLoadStates[index] && (
-                <Image
-                  src={item.image}
-                  alt="Načítání..."
-                  width={50}
-                  height={50}
-                  className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110"
-                  quality={1}
-                />
-              )}
+              {/* Next.js Image with native lazy loading */}
               <Image
                 src={item.image}
                 alt={item.name || `${item.type} ${item.id}`}
@@ -308,9 +337,12 @@ export default function TvorbaPage() {
                 className={`w-full h-auto object-cover transition-all duration-300 group-hover:scale-105 ${
                   imageLoadStates[index] ? "opacity-100" : "opacity-0"
                 }`}
-                loading={index < 4 ? "eager" : "lazy"}
-                priority={index < 4}
+                priority={index < 6}
+                loading={index < 6 ? "eager" : "lazy"}
+                fetchPriority={index < 3 ? "high" : "auto"}
                 onLoad={() => handleImageLoad(index)}
+                placeholder="blur"
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             </motion.div>

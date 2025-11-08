@@ -44,7 +44,6 @@ export default function Home() {
       selectedCategory === "all" || artwork.category === selectedCategory;
     const exhibitionMatch =
       selectedExhibition === "all" || artwork.exhibition === selectedExhibition;
-
     return yearMatch && categoryMatch && exhibitionMatch;
   });
 
@@ -64,6 +63,15 @@ export default function Home() {
   const handleImageLoad = (index: number) => {
     setImageLoadStates((prev) => ({ ...prev, [index]: true }));
   };
+
+  // Scroll to top when filters change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [selectedYear, selectedCategory, selectedExhibition]);
+
+  // Note: Manual prefetch removed - Next.js handles this via priority prop
+  // and hidden preload section below. Native browser lazy loading + Next.js
+  // Image Optimization API already provide optimal loading performance.
 
   // Keyboard navigation
   useEffect(() => {
@@ -89,7 +97,7 @@ export default function Home() {
       document.addEventListener("keydown", handleKeyDown);
       return () => document.removeEventListener("keydown", handleKeyDown);
     }
-  }, [selectedImageIndex]);
+  }, [selectedImageIndex, filteredArtworks.length]);
 
   const navigateToPrevious = () => {
     if (selectedImageIndex === null) return;
@@ -111,7 +119,7 @@ export default function Home() {
     setSelectedImageIndex(newIndex);
   };
 
-  // Touch/swipe support for horizontal navigation and vertical close
+  // Touch/swipe support
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(
     null
   );
@@ -137,15 +145,12 @@ export default function Home() {
 
     const currentY = e.targetTouches[0].clientY;
     const currentX = e.targetTouches[0].clientX;
-
     setTouchEnd({ x: currentX, y: currentY });
 
     const deltaY = currentY - touchStart.y;
     const deltaX = currentX - touchStart.x;
 
-    // Determine if this is a vertical or horizontal swipe
     if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0) {
-      // Vertical swipe down
       setIsSwipingDown(true);
       setSwipeDownOffset(Math.max(0, deltaY));
       e.preventDefault();
@@ -162,12 +167,9 @@ export default function Home() {
     const deltaX = touchStart.x - touchEnd.x;
     const deltaY = touchEnd.y - touchStart.y;
 
-    // Check if it's a vertical swipe down
     if (isSwipingDown && deltaY > minSwipeDownDistance) {
-      // Close the lightbox
       setSelectedImageIndex(null);
     } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      // Horizontal swipe
       const isLeftSwipe = deltaX > minSwipeDistance;
       const isRightSwipe = deltaX < -minSwipeDistance;
 
@@ -178,40 +180,24 @@ export default function Home() {
       }
     }
 
-    // Reset swipe state
     setSwipeDownOffset(0);
     setIsSwipingDown(false);
     setTouchStart(null);
     setTouchEnd(null);
   };
 
-  // Show filter bar on scroll or after delay
+  // Show filter bar after delay
   useEffect(() => {
-    // Option 1: Show immediately after a delay (current)
     const timer = setTimeout(() => setShowFilterBar(true), 2000);
     return () => clearTimeout(timer);
-
-    // Option 2: Show on scroll (commented out)
-    // const SCROLL_THRESHOLD = 100; // Adjust this value (in pixels)
-    // const handleScroll = () => {
-    //   if (window.scrollY > SCROLL_THRESHOLD) {
-    //     setShowFilterBar(true);
-    //   } else {
-    //     setShowFilterBar(false);
-    //   }
-    // };
-    // window.addEventListener("scroll", handleScroll);
-    // return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Disable body scroll when lightbox is open
   useEffect(() => {
     if (selectedImageIndex !== null) {
-      // Disable scroll
       document.body.style.overflow = "hidden";
       document.body.style.touchAction = "none";
     } else {
-      // Re-enable scroll
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
     }
@@ -222,21 +208,25 @@ export default function Home() {
     };
   }, [selectedImageIndex]);
 
-  // Preload critical images on component mount
-  useEffect(() => {
-    // Preload first 4 images in the background
-    artworks.slice(0, 4).forEach((artwork, index) => {
-      const img = new window.Image();
-      img.src = artwork.image;
-      img.onload = () => handleImageLoad(index);
-    });
-  }, []);
-
   return (
     <div className="min-h-screen py-5 lg:py-20 bg-white relative">
       {/* Subtle grid background */}
       <div className="absolute inset-0 pointer-events-none opacity-75 bg-blueprint-pattern"></div>
       <div className="max-w-11/12 mx-auto px-3 lg:px-8 relative z-10">
+        {/* Hidden preload images for lightbox - loads in background */}
+        <div className="hidden" aria-hidden="true">
+          {filteredArtworks.slice(0, 10).map((artwork, index) => (
+            <Image
+              key={`preload-${artwork.id}`}
+              src={artwork.image}
+              alt=""
+              width={1920}
+              height={1080}
+              priority={index < 3}
+            />
+          ))}
+        </div>
+
         {/* Masonry-style grid */}
         <motion.div
           className="columns-1 gap-4 space-y-4"
@@ -256,15 +246,8 @@ export default function Home() {
                 setSelectedImageIndex(index);
               }}
             >
-              <div className="relative overflow-hidden ">
-                {/* Skeleton/Blur placeholder */}
-                {!imageLoadStates[index] && (
-                  <div className="absolute inset-0 bg-gray-100 animate-pulse">
-                    <div className="w-full h-48 bg-linear-to-br from-gray-200 via-gray-100 to-gray-200 animate-pulse"></div>
-                  </div>
-                )}
-
-                {/* Real artwork images */}
+              <div className="relative overflow-hidden">
+                {/* Next.js Image with native lazy loading */}
                 <Image
                   src={artwork.image}
                   alt={artwork.title}
@@ -273,12 +256,13 @@ export default function Home() {
                   className={`w-full h-auto object-cover transition-all duration-700 group-hover:scale-105 ${
                     imageLoadStates[index] ? "opacity-100" : "opacity-0"
                   }`}
-                  priority={index < 4} // First 4 images load with priority
-                  onLoad={() => handleImageLoad(index)}
+                  priority={index < 4}
                   loading={index < 4 ? "eager" : "lazy"}
+                  onLoad={() => handleImageLoad(index)}
                   placeholder="blur"
                   blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  fetchPriority={index < 3 ? "high" : "auto"}
                 />
 
                 {/* Minimal overlay on hover */}
@@ -295,7 +279,7 @@ export default function Home() {
         </motion.div>
       </div>
 
-      {/* Lightbox Modal - Minimal design */}
+      {/* Lightbox Modal */}
       {selectedImage && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -310,7 +294,7 @@ export default function Home() {
         >
           <button
             onClick={() => setSelectedImageIndex(null)}
-            className="absolute top-5 right-5 text-white hover:text-gray-300 transition-colors z-10 p-2  cursor-pointer hover:bg-opacity-10 rounded-full"
+            className="absolute top-5 right-5 text-white hover:text-gray-300 transition-colors z-10 p-2 cursor-pointer hover:bg-opacity-10 rounded-full"
             aria-label="Zavřít (stiskněte klávesu ESC)"
           >
             <X size={30} />
@@ -322,7 +306,7 @@ export default function Home() {
               e.stopPropagation();
               navigateToPrevious();
             }}
-            className="absolute left-5 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-all z-10 p-3  cursor-pointer hover:bg-opacity-10 rounded-full"
+            className="absolute left-5 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-all z-10 p-3 cursor-pointer hover:bg-opacity-10 rounded-full"
             aria-label="Previous image (← Arrow)"
           >
             <ChevronLeft size={30} />
@@ -333,7 +317,7 @@ export default function Home() {
               e.stopPropagation();
               navigateToNext();
             }}
-            className="absolute right-5 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-all z-10 p-3  cursor-pointer hover:bg-opacity-10 rounded-full"
+            className="absolute right-5 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-all z-10 p-3 cursor-pointer hover:bg-opacity-10 rounded-full"
             aria-label="Next image (→ Arrow)"
           >
             <ChevronRight size={30} />
@@ -361,7 +345,7 @@ export default function Home() {
               transition={{ duration: 0.3 }}
               className="relative"
             >
-              {/* Blurred low-res version of the actual image */}
+              {/* Blurred placeholder while loading */}
               {!lightboxImageLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Image
@@ -375,47 +359,30 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Real lightbox image that loads in sharp */}
+              {/* High-res lightbox image */}
               <Image
                 src={selectedImage.image}
                 alt={selectedImage.title}
-                width={1200}
-                height={800}
+                width={1920}
+                height={1080}
+                quality={95}
                 className={`max-w-full max-h-[70vh] w-auto h-auto object-contain transition-all duration-500 ${
                   lightboxImageLoaded
                     ? "opacity-100 blur-0"
                     : "opacity-0 blur-sm"
                 }`}
                 priority
-                sizes="(max-width: 768px) 100vw, 80vw"
+                sizes="(max-width: 768px) 100vw, 90vw"
                 onLoad={() => setLightboxImageLoaded(true)}
               />
             </motion.div>
 
-            {/* Minimal caption with image counter */}
+            {/* Minimal caption */}
             <div className="mt-2 text-white flex items-start justify-between w-full">
               <div>
                 <h3 className="text-base font-light">{selectedImage.title}</h3>
                 <p className="text-xs text-gray-300">{selectedImage.year}</p>
-                {/* 
-                {selectedImage.medium && (
-                  <p className="text-sm text-gray-400">
-                    {selectedImage.medium}
-                  </p>
-                )}
-                {selectedImage.dimensions && (
-                  <p className="text-sm text-gray-400">
-                    {selectedImage.dimensions}
-                  </p>
-                )}*/}
               </div>
-              {/* 
-              <div>
-                <p className="text-sm text-gray-400">
-                  {selectedImageIndex! + 1} / {filteredArtworks.length}
-                </p>
-              </div>
-              */}
             </div>
           </div>
         </motion.div>
@@ -443,7 +410,7 @@ export default function Home() {
                     e.target.value ? parseInt(e.target.value) : null
                   )
                 }
-                className={`cursor-pointer px-4 py-2.5 pr-8 text-sm border border-gray-200/60 rounded-2xl bg-white/60 backdrop-blur hover:bg-white/80 hover:border-gray-300 transition-all  focus:outline-none font-inter shadow-sm ${
+                className={`cursor-pointer px-4 py-2.5 pr-8 text-sm border border-gray-200/60 rounded-2xl bg-white/60 backdrop-blur hover:bg-white/80 hover:border-gray-300 transition-all focus:outline-none font-inter shadow-sm ${
                   isMobile ? "w-28" : "w-auto"
                 }`}
               >
@@ -467,40 +434,12 @@ export default function Home() {
               )}
             </div>
 
-            {/* Category Filter 
-            <div className="relative">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className={`cursor-pointer px-4 py-2.5 pr-8 text-sm border border-gray-200/60 rounded-2xl bg-white/60 backdrop-blur hover:bg-white/80 hover:border-gray-300 transition-all focus:ring-2 focus:ring-gray-400 focus:outline-none font-inter shadow-sm ${
-                  isMobile ? "w-28" : "w-auto"
-                }`}
-              >
-                <option value="all">Co?</option>
-                <option value="traditional">Tradiční</option>
-                <option value="non-traditional">Netradiční</option>
-                <option value="minimalistic">Minimalistické</option>
-              </select>
-              {isMobile && (
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                  <svg
-                    className="fill-current h-4 w-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                  </svg>
-                </div>
-              )}
-            </div>
-            */}
-
             {/* Exhibition Filter */}
             <div className="relative">
               <select
                 value={selectedExhibition}
                 onChange={(e) => setSelectedExhibition(e.target.value)}
-                className={`cursor-pointer px-4 py-2.5 pr-8 text-sm border border-gray-200/60 rounded-2xl bg-white/60 backdrop-blur hover:bg-white/80 hover:border-gray-300 transition-all  focus:outline-none font-inter shadow-sm ${
+                className={`cursor-pointer px-4 py-2.5 pr-8 text-sm border border-gray-200/60 rounded-2xl bg-white/60 backdrop-blur hover:bg-white/80 hover:border-gray-300 transition-all focus:outline-none font-inter shadow-sm ${
                   isMobile ? "w-full" : "w-auto"
                 }`}
               >
