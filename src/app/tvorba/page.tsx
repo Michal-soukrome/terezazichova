@@ -9,46 +9,47 @@ import Image from "next/image";
 const tvorbaItems = [
   {
     id: 1,
-    image: "/images/tvorba/kresba1.jpg",
-    type: "kresba",
-    name: "", // To be filled later
-    year: null, // To be filled later
-  },
-  {
-    id: 2,
-    image: "/images/tvorba/kresba2.jpg",
-    type: "kresba",
-    name: "",
-    year: null,
-  },
-  {
-    id: 3,
-    image: "/images/tvorba/kresba3.jpg",
-    type: "kresba",
-    name: "",
-    year: null,
-  },
-  {
-    id: 4,
     image: "/images/tvorba/malba1.jpg",
     type: "malba",
     name: "",
     year: null,
   },
   {
-    id: 5,
+    id: 2,
     image: "/images/tvorba/malba2.jpg",
     type: "malba",
     name: "",
     year: null,
   },
   {
-    id: 6,
+    id: 3,
     image: "/images/tvorba/malba3.jpg",
     type: "malba",
     name: "",
     year: null,
   },
+  {
+    id: 4,
+    image: "/images/tvorba/kresba1.jpg",
+    type: "kresba",
+    name: "", // To be filled later
+    year: null, // To be filled later
+  },
+  {
+    id: 5,
+    image: "/images/tvorba/kresba2.jpg",
+    type: "kresba",
+    name: "",
+    year: null,
+  },
+  {
+    id: 6,
+    image: "/images/tvorba/kresba3.jpg",
+    type: "kresba",
+    name: "",
+    year: null,
+  },
+
   {
     id: 7,
     image: "/images/tvorba/grafika1.jpg",
@@ -459,8 +460,8 @@ export default function TvorbaPage() {
                 }`}
               >
                 <option value="all">Typ tvorby</option>
-                <option value="kresba">Kresba</option>
                 <option value="malba">Malba</option>
+                <option value="kresba">Kresba</option>
                 <option value="grafika">Grafika</option>
               </select>
               {isMobile && (
