@@ -19,9 +19,62 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Tereza Zichova | malba, kresba, grafika",
+  title: "Tereza Zichová - Malba, kresba, grafika",
   description:
-    "Contemporary malba, kresba, grafika exploring the intersection between digital and analog mediums.",
+    "Grafika, malba, kresba. Jsem Tereza Zichová a ráda vás vítám na mém webu, který se zaměřuje na mou tvorbu. Tak se pojďte podívat!",
+  metadataBase: new URL("https://terezazichova.cz"),
+  alternates: {
+    canonical: "/",
+  },
+  keywords: [
+    "Tereza Zichová",
+    "malba",
+    "kresba",
+    "grafika",
+    "umění",
+    "výtvarné umění",
+    "česká malířka",
+    "contemporary art",
+    "Prague artist",
+  ],
+  authors: [{ name: "Tereza Zichová" }],
+  creator: "Tereza Zichová",
+  publisher: "Tereza Zichová",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "cs_CZ",
+    url: "https://terezazichova.cz/",
+    siteName: "Tereza Zichová",
+    title: "Tereza Zichová - Malba, kresba, grafika",
+    description:
+      "Grafika, malba, kresba. Jsem Tereza Zichová a ráda vás vítám na mém webu, který se zaměřuje na mou tvorbu. Tak se pojďte podívat!",
+    images: [
+      {
+        url: "/images/og-image.jpg", // You'll need to add this image
+        width: 1200,
+        height: 630,
+        alt: "Tereza Zichová - Portfolio",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tereza Zichová - Malba, kresba, grafika",
+    description:
+      "Grafika, malba, kresba. Jsem Tereza Zichová a ráda vás vítám na mém webu, který se zaměřuje na mou tvorbu. Tak se pojďte podívat!",
+    images: ["/images/og-image.jpg"],
+  },
 };
 
 export default function RootLayout({
@@ -30,7 +83,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="cs">
       <body
         className={`${inter.variable} ${poppins.variable} font-sans antialiased safe-area-x`}
       >

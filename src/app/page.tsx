@@ -13,6 +13,11 @@ export default function Home() {
   const [imageLoadStates, setImageLoadStates] = useState<{
     [key: number]: boolean;
   }>({});
+  const [lightboxImageLoaded, setLightboxImageLoaded] = useState(false);
+
+  // Swipe down to close state
+  const [swipeDownOffset, setSwipeDownOffset] = useState(0);
+  const [isSwipingDown, setIsSwipingDown] = useState(false);
 
   // Filtering state
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
@@ -75,6 +80,7 @@ export default function Home() {
 
   const navigateToPrevious = () => {
     if (selectedImageIndex === null) return;
+    setLightboxImageLoaded(false);
     const newIndex =
       selectedImageIndex === 0
         ? filteredArtworks.length - 1
@@ -84,6 +90,7 @@ export default function Home() {
 
   const navigateToNext = () => {
     if (selectedImageIndex === null) return;
+    setLightboxImageLoaded(false);
     const newIndex =
       selectedImageIndex === filteredArtworks.length - 1
         ? 0
@@ -91,34 +98,97 @@ export default function Home() {
     setSelectedImageIndex(newIndex);
   };
 
-  // Touch/swipe support
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  // Touch/swipe support for horizontal navigation and vertical close
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(
+    null
+  );
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(
+    null
+  );
 
   const minSwipeDistance = 50;
+  const minSwipeDownDistance = 100;
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    setTouchStart({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
+    setIsSwipingDown(false);
+    setSwipeDownOffset(0);
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    if (!touchStart) return;
+
+    const currentY = e.targetTouches[0].clientY;
+    const currentX = e.targetTouches[0].clientX;
+
+    setTouchEnd({ x: currentX, y: currentY });
+
+    const deltaY = currentY - touchStart.y;
+    const deltaX = currentX - touchStart.x;
+
+    // Determine if this is a vertical or horizontal swipe
+    if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0) {
+      // Vertical swipe down
+      setIsSwipingDown(true);
+      setSwipeDownOffset(Math.max(0, deltaY));
+      e.preventDefault();
+    }
   };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe) {
-      navigateToNext();
-    } else if (isRightSwipe) {
-      navigateToPrevious();
+    if (!touchStart || !touchEnd) {
+      setSwipeDownOffset(0);
+      setIsSwipingDown(false);
+      return;
     }
+
+    const deltaX = touchStart.x - touchEnd.x;
+    const deltaY = touchEnd.y - touchStart.y;
+
+    // Check if it's a vertical swipe down
+    if (isSwipingDown && deltaY > minSwipeDownDistance) {
+      // Close the lightbox
+      setSelectedImageIndex(null);
+    } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      // Horizontal swipe
+      const isLeftSwipe = deltaX > minSwipeDistance;
+      const isRightSwipe = deltaX < -minSwipeDistance;
+
+      if (isLeftSwipe) {
+        navigateToNext();
+      } else if (isRightSwipe) {
+        navigateToPrevious();
+      }
+    }
+
+    // Reset swipe state
+    setSwipeDownOffset(0);
+    setIsSwipingDown(false);
+    setTouchStart(null);
+    setTouchEnd(null);
   };
+
+  // Disable body scroll when lightbox is open
+  useEffect(() => {
+    if (selectedImageIndex !== null) {
+      // Disable scroll
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+    } else {
+      // Re-enable scroll
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    };
+  }, [selectedImageIndex]);
 
   // Preload critical images on component mount
   useEffect(() => {
@@ -201,11 +271,6 @@ export default function Home() {
                 ))}
               </select>
             </div>
-
-            {/* Results count */}
-            <div className="ml-auto text-sm text-gray-500 font-inter">
-              {filteredArtworks.length} z {artworks.length} děl
-            </div>
           </div>
         </motion.div>
 
@@ -221,9 +286,12 @@ export default function Home() {
               key={artwork.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              transition={{ duration: 0.6, delay: index * 0.25 }}
               className="break-inside-avoid mb-4 group cursor-pointer border border-gray-100"
-              onClick={() => setSelectedImageIndex(index)}
+              onClick={() => {
+                setLightboxImageLoaded(false);
+                setSelectedImageIndex(index);
+              }}
             >
               <div className="relative overflow-hidden ">
                 {/* Skeleton/Blur placeholder */}
@@ -268,7 +336,11 @@ export default function Home() {
       {selectedImage && (
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={{
+            opacity: isSwipingDown
+              ? Math.max(0.3, 1 - swipeDownOffset / 300)
+              : 1,
+          }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center"
           onClick={() => setSelectedImageIndex(null)}
@@ -276,7 +348,7 @@ export default function Home() {
           <button
             onClick={() => setSelectedImageIndex(null)}
             className="absolute top-5 right-5 text-white hover:text-gray-300 transition-colors z-10 p-2  cursor-pointer hover:bg-opacity-10 rounded-full"
-            aria-label="Close (ESC)"
+            aria-label="Zavřít (stiskněte klávesu ESC)"
           >
             <X size={30} />
           </button>
@@ -305,7 +377,15 @@ export default function Home() {
           </button>
 
           <div
-            className="relative max-w-6xl max-h-full"
+            className="relative max-w-6xl max-h-full transition-transform"
+            style={{
+              transform: isSwipingDown
+                ? `translateY(${swipeDownOffset}px) scale(${Math.max(
+                    0.85,
+                    1 - swipeDownOffset / 1000
+                  )})`
+                : "translateY(0) scale(1)",
+            }}
             onClick={(e) => e.stopPropagation()}
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
@@ -318,16 +398,34 @@ export default function Home() {
               transition={{ duration: 0.3 }}
               className="relative"
             >
-              {/* Real lightbox image with built-in blur placeholder */}
+              {/* Blurred low-res version of the actual image */}
+              {!lightboxImageLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Image
+                    src={selectedImage.image}
+                    alt={selectedImage.title}
+                    width={50}
+                    height={50}
+                    className="max-w-full max-h-[70vh] w-auto h-auto object-contain blur-2xl scale-110"
+                    quality={1}
+                  />
+                </div>
+              )}
+
+              {/* Real lightbox image that loads in sharp */}
               <Image
                 src={selectedImage.image}
                 alt={selectedImage.title}
                 width={1200}
                 height={800}
-                className="max-w-full max-h-[70vh] w-auto h-auto object-contain"
+                className={`max-w-full max-h-[70vh] w-auto h-auto object-contain transition-all duration-500 ${
+                  lightboxImageLoaded
+                    ? "opacity-100 blur-0"
+                    : "opacity-0 blur-sm"
+                }`}
                 priority
-                placeholder="blur"
-                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+                sizes="(max-width: 768px) 100vw, 80vw"
+                onLoad={() => setLightboxImageLoaded(true)}
               />
             </motion.div>
 
