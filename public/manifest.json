@@ -1,7 +1,7 @@
 {
-  "name": "Tereza Zichová - Portfolio",
-  "short_name": "T. Zichová",
-  "description": "Portfolio české umělkyně Terezy Zichové - kresby, ilustrace a umělecká tvorba",
+  "name": "Tereza Zichová",
+  "short_name": "Tereza Zichová",
+  "description": "Malba, kresba, grafika",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

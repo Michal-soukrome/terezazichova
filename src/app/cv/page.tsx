@@ -304,7 +304,7 @@ export default function Exhibitions() {
                 className="flex flex-col md:flex-row md:items-start gap-4 py-4 border-l-2 border-gray-100 pl-6"
               >
                 <div className="md:w-32 flex-shrink-0">
-                  <span className="text-sm font-medium text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
+                  <span className="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
                     {item.years}
                   </span>
                 </div>

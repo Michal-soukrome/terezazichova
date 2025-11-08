@@ -1,9 +1,20 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { X, ChevronLeft, ChevronRight, ZoomOut, ZoomIn } from "lucide-react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+
+// Lazy load zoom component to avoid bloating initial bundle
+const TransformWrapper = dynamic(
+  () => import("react-zoom-pan-pinch").then((mod) => mod.TransformWrapper),
+  { ssr: false }
+);
+const TransformComponent = dynamic(
+  () => import("react-zoom-pan-pinch").then((mod) => mod.TransformComponent),
+  { ssr: false }
+);
 
 // Tvorba data structure
 const tvorbaItems = [
@@ -89,6 +100,11 @@ export default function TvorbaPage() {
   const [swipeDownOffset, setSwipeDownOffset] = useState(0);
   const [isSwipingDown, setIsSwipingDown] = useState(false);
 
+  // Zoom state - track if user explicitly activated zoom mode
+  const [zoomModeActive, setZoomModeActive] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const transformRef = useRef<any>(null);
+
   // Filtering state
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedType, setSelectedType] = useState<string>("all");
@@ -100,6 +116,14 @@ export default function TvorbaPage() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [selectedYear, selectedType]);
+
+  // Reset zoom when image changes
+  useEffect(() => {
+    if (transformRef.current && selectedImageIndex !== null) {
+      transformRef.current.resetTransform();
+      setIsZoomed(false);
+    }
+  }, [selectedImageIndex]);
 
   // Mobile detection for compact filters
   const [isMobile, setIsMobile] = useState(false);
@@ -171,6 +195,11 @@ export default function TvorbaPage() {
     setImageLoadStates((prev) => ({ ...prev, [index]: true }));
   };
 
+  // Track slide direction for animations
+  const [slideDirection, setSlideDirection] = useState<"left" | "right">(
+    "right"
+  );
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -181,12 +210,16 @@ export default function TvorbaPage() {
           setSelectedImageIndex(null);
           break;
         case "ArrowLeft":
-          event.preventDefault();
-          navigateToPrevious();
+          if (filteredItems.length > 1) {
+            event.preventDefault();
+            navigateToPrevious();
+          }
           break;
         case "ArrowRight":
-          event.preventDefault();
-          navigateToNext();
+          if (filteredItems.length > 1) {
+            event.preventDefault();
+            navigateToNext();
+          }
           break;
       }
     };
@@ -195,10 +228,11 @@ export default function TvorbaPage() {
       document.addEventListener("keydown", handleKeyDown);
       return () => document.removeEventListener("keydown", handleKeyDown);
     }
-  }, [selectedImageIndex]);
+  }, [selectedImageIndex, filteredItems.length]);
 
   const navigateToPrevious = () => {
-    if (selectedImageIndex === null) return;
+    if (selectedImageIndex === null || filteredItems.length === 0) return;
+    setSlideDirection("left");
     setLightboxImageLoaded(false);
     const newIndex =
       selectedImageIndex === 0
@@ -208,7 +242,8 @@ export default function TvorbaPage() {
   };
 
   const navigateToNext = () => {
-    if (selectedImageIndex === null) return;
+    if (selectedImageIndex === null || filteredItems.length === 0) return;
+    setSlideDirection("right");
     setLightboxImageLoaded(false);
     const newIndex =
       selectedImageIndex === filteredItems.length - 1
@@ -224,6 +259,9 @@ export default function TvorbaPage() {
   const [touchEndY, setTouchEndY] = useState<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    // Only handle touch if zoom mode is NOT active
+    if (zoomModeActive) return;
+
     setTouchEndX(null);
     setTouchEndY(null);
     setTouchStartX(e.targetTouches[0].clientX);
@@ -231,6 +269,9 @@ export default function TvorbaPage() {
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    // Only handle touch if zoom mode is NOT active
+    if (zoomModeActive) return;
+
     setTouchEndX(e.targetTouches[0].clientX);
     setTouchEndY(e.targetTouches[0].clientY);
 
@@ -246,6 +287,9 @@ export default function TvorbaPage() {
   };
 
   const handleTouchEnd = () => {
+    // Only handle touch if zoom mode is NOT active
+    if (zoomModeActive) return;
+
     if (!touchStartX || !touchStartY || !touchEndX || !touchEndY) return;
 
     const distanceX = touchEndX - touchStartX;
@@ -257,9 +301,10 @@ export default function TvorbaPage() {
     const isDownSwipe =
       distanceY > 100 && Math.abs(distanceY) > Math.abs(distanceX);
 
-    if (isLeftSwipe) {
+    // Allow horizontal swipe navigation if there are multiple images
+    if (isLeftSwipe && filteredItems.length > 1) {
       navigateToNext();
-    } else if (isRightSwipe) {
+    } else if (isRightSwipe && filteredItems.length > 1) {
       navigateToPrevious();
     } else if (isDownSwipe) {
       setSelectedImageIndex(null);
@@ -275,7 +320,7 @@ export default function TvorbaPage() {
 
   // Show filter bar after delay
   useEffect(() => {
-    const timer = setTimeout(() => setShowFilterBar(true), 2000);
+    const timer = setTimeout(() => setShowFilterBar(true), 1000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -307,7 +352,7 @@ export default function TvorbaPage() {
   return (
     <div className="min-h-screen py-5 lg:py-20 bg-white relative pb-safe">
       {/* Subtle grid background */}
-      <div className="absolute inset-0 pointer-events-none opacity-75 bg-blueprint-pattern"></div>
+      <div className="absolute inset-0 pointer-events-none opacity-75 bg-grid-pattern"></div>
       <div className="max-w-11/12 mx-auto px-3 lg:px-8 relative z-10 pb-safe">
         {/* Masonry-style grid */}
         <motion.div
@@ -370,66 +415,179 @@ export default function TvorbaPage() {
             className="relative w-full h-full flex items-center justify-center p-4"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close button */}
-            <button
-              onClick={() => setSelectedImageIndex(null)}
-              className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm cursor-pointer"
-              aria-label="Zavřít"
-            >
-              <X className="w-6 h-6 text-white" />
-            </button>
+            <div className="w-full px-4 absolute top-4 left-0 flex items-start justify-between">
+              {/* Zoom controls with feedback */}
+              <div className=" z-10 flex items-center gap-2">
+                {" "}
+                {/* Close button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setZoomModeActive(true);
+                  }}
+                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm cursor-pointer"
+                  aria-label="Aktivovat přiblížení"
+                  title="Aktivovat přiblížení"
+                >
+                  <ZoomIn className="w-6 h-6 text-white" />
+                </button>
+                {zoomModeActive && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (transformRef.current) {
+                          transformRef.current.resetTransform();
+                        }
+                        setZoomModeActive(false);
+                        setIsZoomed(false);
+                      }}
+                      className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm cursor-pointer"
+                      aria-label="Resetovat přiblížení"
+                      title="Resetovat přiblížení (obnoví gesta)"
+                    >
+                      <ZoomOut className="w-6 h-6 text-white" />
+                    </button>
 
-            {/* Navigation buttons */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                navigateToPrevious();
-              }}
-              className="absolute left-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm cursor-pointer"
-              aria-label="Předchozí"
-            >
-              <ChevronLeft className="w-6 h-6 text-white" />
-            </button>
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="fixed w-full flex items-center justify-center left-0 bottom-5 "
+                    >
+                      <span className="bg-black/80 backdrop-blur-sm text-gray-200 text-xs px-3 py-1.5 rounded-full  text-center border border-gray-200">
+                        Nyní můžete přibližovat pomocí gest
+                      </span>
+                    </motion.div>
+                  </>
+                )}
+              </div>
 
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                navigateToNext();
-              }}
-              className="absolute right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm cursor-pointer"
-              aria-label="Další"
-            >
-              <ChevronRight className="w-6 h-6 text-white" />
-            </button>
-
-            {/* Lightbox image with blur placeholder */}
-            <div className="relative max-w-7xl max-h-full">
-              {!lightboxImageLoaded && (
-                <Image
-                  src={selectedImage.image}
-                  alt="Načítání..."
-                  width={50}
-                  height={50}
-                  className="absolute inset-0 w-full h-full object-contain blur-2xl scale-110"
-                  quality={1}
-                />
-              )}
-              <Image
-                src={selectedImage.image}
-                alt={
-                  selectedImage.name ||
-                  `${selectedImage.type} ${selectedImage.id}`
-                }
-                width={1920}
-                height={1080}
-                className={`max-w-full max-h-[90vh] object-contain transition-opacity duration-300 ${
-                  lightboxImageLoaded ? "opacity-100" : "opacity-0"
-                }`}
-                priority
-                quality={95}
-                onLoad={() => setLightboxImageLoaded(true)}
-              />
+              <button
+                onClick={() => setSelectedImageIndex(null)}
+                className=" z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm cursor-pointer"
+                aria-label="Zavřít"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
             </div>
+
+            {/* Navigation buttons - only show if multiple images */}
+            {filteredItems.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigateToPrevious();
+                  }}
+                  className="absolute left-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm cursor-pointer"
+                  aria-label="Předchozí"
+                >
+                  <ChevronLeft className="w-6 h-6 text-white" />
+                </button>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigateToNext();
+                  }}
+                  className="absolute right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm cursor-pointer"
+                  aria-label="Další"
+                >
+                  <ChevronRight className="w-6 h-6 text-white" />
+                </button>
+              </>
+            )}
+
+            {/* Lightbox image with blur placeholder and pinch-to-zoom */}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={selectedImage.id}
+                initial={{
+                  opacity: 0,
+                  x: slideDirection === "left" ? -300 : 300,
+                }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                }}
+                exit={{
+                  opacity: 0,
+                  x: slideDirection === "left" ? 300 : -300,
+                }}
+                transition={{
+                  duration: 0.4,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+                className="relative max-w-7xl max-h-full"
+              >
+                {!lightboxImageLoaded && (
+                  <Image
+                    src={selectedImage.image}
+                    alt="Načítání..."
+                    width={50}
+                    height={50}
+                    className="absolute inset-0 w-full h-full object-contain blur-2xl scale-110"
+                    quality={1}
+                  />
+                )}
+                {/* High-res lightbox image - zoom only when activated */}
+                {zoomModeActive ? (
+                  <TransformWrapper
+                    ref={transformRef}
+                    initialScale={1}
+                    minScale={1}
+                    maxScale={4}
+                    doubleClick={{ disabled: false, mode: "toggle" }}
+                    wheel={{ disabled: true }}
+                    panning={{ disabled: false }}
+                    pinch={{ disabled: false }}
+                    velocityAnimation={{ disabled: false }}
+                    onTransformed={(ref, state) => {
+                      setIsZoomed(state.scale > 1.01);
+                    }}
+                  >
+                    <TransformComponent
+                      wrapperClass="!w-auto !h-auto"
+                      contentClass="!w-auto !h-auto"
+                    >
+                      <Image
+                        src={selectedImage.image}
+                        alt={
+                          selectedImage.name ||
+                          `${selectedImage.type} ${selectedImage.id}`
+                        }
+                        width={1920}
+                        height={1080}
+                        className={`max-w-full max-h-[90vh] object-contain transition-opacity duration-300 ${
+                          lightboxImageLoaded ? "opacity-100" : "opacity-0"
+                        }`}
+                        priority
+                        quality={95}
+                        onLoad={() => setLightboxImageLoaded(true)}
+                        draggable={false}
+                      />
+                    </TransformComponent>
+                  </TransformWrapper>
+                ) : (
+                  <Image
+                    src={selectedImage.image}
+                    alt={
+                      selectedImage.name ||
+                      `${selectedImage.type} ${selectedImage.id}`
+                    }
+                    width={1920}
+                    height={1080}
+                    className={`max-w-full max-h-[90vh] object-contain transition-opacity duration-300 ${
+                      lightboxImageLoaded ? "opacity-100" : "opacity-0"
+                    }`}
+                    priority
+                    quality={95}
+                    onLoad={() => setLightboxImageLoaded(true)}
+                    draggable={false}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
         </motion.div>
       )}
@@ -447,41 +605,6 @@ export default function TvorbaPage() {
       >
         <div className="backdrop-blur-2xl bg-white/70 border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-3xl p-2 md:p-5 hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] transition-shadow duration-300">
           <div className="flex flex-nowrap gap-2 items-center justify-center w-full overflow-hidden">
-            {/* Year Filter */}
-            {uniqueYears.length > 0 && (
-              <div className="relative">
-                <select
-                  value={selectedYear || ""}
-                  onChange={(e) =>
-                    setSelectedYear(
-                      e.target.value ? parseInt(e.target.value) : null
-                    )
-                  }
-                  className={`cursor-pointer px-4 py-2.5 pr-8 text-sm border border-gray-200/60 rounded-2xl bg-white/60 backdrop-blur hover:bg-white/80 hover:border-gray-300 transition-all  focus:outline-none font-inter shadow-sm ${
-                    isMobile ? "w-28" : "w-auto"
-                  }`}
-                >
-                  <option value="">Kdy?</option>
-                  {uniqueYears.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-                {isMobile && (
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                    <svg
-                      className="fill-current h-4 w-4"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                    </svg>
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* Type Filter */}
             <div className="relative">
               <select

@@ -1,10 +1,21 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { X, ChevronLeft, ChevronRight, ZoomOut, ZoomIn } from "lucide-react";
 import { artworks } from "../lib/artworks";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+
+// Lazy load zoom component to avoid bloating initial bundle
+const TransformWrapper = dynamic(
+  () => import("react-zoom-pan-pinch").then((mod) => mod.TransformWrapper),
+  { ssr: false }
+);
+const TransformComponent = dynamic(
+  () => import("react-zoom-pan-pinch").then((mod) => mod.TransformComponent),
+  { ssr: false }
+);
 
 export default function Home() {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
@@ -18,6 +29,12 @@ export default function Home() {
   // Swipe down to close state
   const [swipeDownOffset, setSwipeDownOffset] = useState(0);
   const [isSwipingDown, setIsSwipingDown] = useState(false);
+
+  // Zoom state - track if user explicitly activated zoom mode
+  const [zoomModeActive, setZoomModeActive] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [showZoomMessage, setShowZoomMessage] = useState(false);
+  const transformRef = useRef<any>(null);
 
   // Filtering state
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
@@ -64,10 +81,36 @@ export default function Home() {
     setImageLoadStates((prev) => ({ ...prev, [index]: true }));
   };
 
+  // Track slide direction for animations
+  const [slideDirection, setSlideDirection] = useState<"left" | "right">(
+    "right"
+  );
+
   // Scroll to top when filters change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [selectedYear, selectedCategory, selectedExhibition]);
+
+  // Reset zoom when image changes
+  useEffect(() => {
+    if (transformRef.current && selectedImageIndex !== null) {
+      transformRef.current.resetTransform();
+      setIsZoomed(false);
+    }
+  }, [selectedImageIndex]);
+
+  // Auto-hide zoom message after 2 seconds
+  useEffect(() => {
+    if (zoomModeActive) {
+      setShowZoomMessage(true);
+      const timer = setTimeout(() => {
+        setShowZoomMessage(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowZoomMessage(false);
+    }
+  }, [zoomModeActive]);
 
   // Note: Manual prefetch removed - Next.js handles this via priority prop
   // and hidden preload section below. Native browser lazy loading + Next.js
@@ -83,12 +126,16 @@ export default function Home() {
           setSelectedImageIndex(null);
           break;
         case "ArrowLeft":
-          event.preventDefault();
-          navigateToPrevious();
+          if (filteredArtworks.length > 1) {
+            event.preventDefault();
+            navigateToPrevious();
+          }
           break;
         case "ArrowRight":
-          event.preventDefault();
-          navigateToNext();
+          if (filteredArtworks.length > 1) {
+            event.preventDefault();
+            navigateToNext();
+          }
           break;
       }
     };
@@ -100,7 +147,8 @@ export default function Home() {
   }, [selectedImageIndex, filteredArtworks.length]);
 
   const navigateToPrevious = () => {
-    if (selectedImageIndex === null) return;
+    if (selectedImageIndex === null || filteredArtworks.length === 0) return;
+    setSlideDirection("left");
     setLightboxImageLoaded(false);
     const newIndex =
       selectedImageIndex === 0
@@ -110,7 +158,8 @@ export default function Home() {
   };
 
   const navigateToNext = () => {
-    if (selectedImageIndex === null) return;
+    if (selectedImageIndex === null || filteredArtworks.length === 0) return;
+    setSlideDirection("right");
     setLightboxImageLoaded(false);
     const newIndex =
       selectedImageIndex === filteredArtworks.length - 1
@@ -131,6 +180,9 @@ export default function Home() {
   const minSwipeDownDistance = 100;
 
   const onTouchStart = (e: React.TouchEvent) => {
+    // Only handle touch if zoom mode is NOT active
+    if (zoomModeActive) return;
+
     setTouchEnd(null);
     setTouchStart({
       x: e.targetTouches[0].clientX,
@@ -141,7 +193,8 @@ export default function Home() {
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    if (!touchStart) return;
+    // Only handle touch if zoom mode is NOT active
+    if (zoomModeActive || !touchStart) return;
 
     const currentY = e.targetTouches[0].clientY;
     const currentX = e.targetTouches[0].clientX;
@@ -158,6 +211,9 @@ export default function Home() {
   };
 
   const onTouchEnd = () => {
+    // Only handle touch if zoom mode is NOT active
+    if (zoomModeActive) return;
+
     if (!touchStart || !touchEnd) {
       setSwipeDownOffset(0);
       setIsSwipingDown(false);
@@ -169,7 +225,11 @@ export default function Home() {
 
     if (isSwipingDown && deltaY > minSwipeDownDistance) {
       setSelectedImageIndex(null);
-    } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    } else if (
+      Math.abs(deltaX) > Math.abs(deltaY) &&
+      filteredArtworks.length > 1
+    ) {
+      // Allow horizontal swipe navigation if there are multiple images
       const isLeftSwipe = deltaX > minSwipeDistance;
       const isRightSwipe = deltaX < -minSwipeDistance;
 
@@ -188,7 +248,7 @@ export default function Home() {
 
   // Show filter bar after delay
   useEffect(() => {
-    const timer = setTimeout(() => setShowFilterBar(true), 2000);
+    const timer = setTimeout(() => setShowFilterBar(true), 1000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -280,7 +340,7 @@ export default function Home() {
       </div>
 
       {/* Lightbox Modal */}
-      {selectedImage && (
+      {selectedImageIndex !== null && selectedImage && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{
@@ -292,36 +352,90 @@ export default function Home() {
           className="fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center"
           onClick={() => setSelectedImageIndex(null)}
         >
-          <button
-            onClick={() => setSelectedImageIndex(null)}
-            className="absolute top-5 right-5 text-white hover:text-gray-300 transition-colors z-10 p-2 cursor-pointer hover:bg-opacity-10 rounded-full"
-            aria-label="Zavřít (stiskněte klávesu ESC)"
-          >
-            <X size={30} />
-          </button>
+          {/* Zoom controls with feedback */}
+          <div className="w-full px-4 absolute top-4 left-0 flex items-start justify-between">
+            {" "}
+            <div className=" z-10 flex items-center gap-2">
+              {/* Close button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setZoomModeActive(true);
+                }}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm cursor-pointer"
+                aria-label="Aktivovat přiblížení"
+                title="Aktivovat přiblížení"
+              >
+                <ZoomIn className="w-6 h-6 text-white" />
+              </button>
+              {zoomModeActive && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (transformRef.current) {
+                        transformRef.current.resetTransform();
+                      }
+                      setZoomModeActive(false);
+                      setIsZoomed(false);
+                    }}
+                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm cursor-pointer"
+                    aria-label="Resetovat přiblížení"
+                    title="Resetovat přiblížení (obnoví gesta)"
+                  >
+                    <ZoomOut className="w-6 h-6 text-white" />
+                  </button>
 
-          {/* Navigation buttons */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigateToPrevious();
-            }}
-            className="absolute left-5 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-all z-10 p-3 cursor-pointer hover:bg-opacity-10 rounded-full"
-            aria-label="Previous image (← Arrow)"
-          >
-            <ChevronLeft size={30} />
-          </button>
+                  {showZoomMessage && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="fixed w-full flex items-center justify-center left-0 bottom-5 "
+                    >
+                      <span className="bg-black/80 backdrop-blur-sm text-gray-200 text-xs px-3 py-1.5 rounded-full  text-center border border-gray-200">
+                        Nyní můžete přibližovat pomocí gest
+                      </span>
+                    </motion.div>
+                  )}
+                </>
+              )}
+            </div>
+            <button
+              onClick={() => setSelectedImageIndex(null)}
+              className=" text-white hover:text-gray-300 transition-colors z-10 p-2 cursor-pointer hover:bg-opacity-10 rounded-full"
+              aria-label="Zavřít (stiskněte klávesu ESC)"
+            >
+              <X size={30} />
+            </button>
+          </div>
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigateToNext();
-            }}
-            className="absolute right-5 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-all z-10 p-3 cursor-pointer hover:bg-opacity-10 rounded-full"
-            aria-label="Next image (→ Arrow)"
-          >
-            <ChevronRight size={30} />
-          </button>
+          {/* Navigation buttons - only show if multiple images */}
+          {filteredArtworks.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigateToPrevious();
+                }}
+                className="absolute left-5 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-all z-10 p-3 cursor-pointer hover:bg-opacity-10 rounded-full"
+                aria-label="Previous image (← Arrow)"
+              >
+                <ChevronLeft size={30} />
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigateToNext();
+                }}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-all z-10 p-3 cursor-pointer hover:bg-opacity-10 rounded-full"
+                aria-label="Next image (→ Arrow)"
+              >
+                <ChevronRight size={30} />
+              </button>
+            </>
+          )}
 
           <div
             className="relative max-w-6xl max-h-full transition-transform"
@@ -338,44 +452,82 @@ export default function Home() {
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
-            <motion.div
-              key={selectedImage.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-              className="relative"
-            >
-              {/* Blurred placeholder while loading */}
-              {!lightboxImageLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Image
-                    src={selectedImage.image}
-                    alt={selectedImage.title}
-                    width={50}
-                    height={50}
-                    className="max-w-full max-h-[70vh] w-auto h-auto object-contain blur-2xl scale-110"
-                    quality={1}
-                  />
-                </div>
-              )}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={selectedImage.id}
+                initial={{
+                  opacity: 0,
+                  x: slideDirection === "left" ? -300 : 300,
+                }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                }}
+                exit={{
+                  opacity: 0,
+                  x: slideDirection === "left" ? 300 : -300,
+                }}
+                transition={{
+                  duration: 0.4,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+                className="relative"
+              >
+                {/* Blurred placeholder while loading */}
+                {!lightboxImageLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Image
+                      src={selectedImage.image}
+                      alt={selectedImage.title}
+                      width={50}
+                      height={50}
+                      className="max-w-full max-h-[70vh] w-auto h-auto object-contain blur-2xl scale-110"
+                      quality={1}
+                    />
+                  </div>
+                )}
 
-              {/* High-res lightbox image */}
-              <Image
-                src={selectedImage.image}
-                alt={selectedImage.title}
-                width={1920}
-                height={1080}
-                quality={95}
-                className={`max-w-full max-h-[70vh] w-auto h-auto object-contain transition-all duration-500 ${
-                  lightboxImageLoaded
-                    ? "opacity-100 blur-0"
-                    : "opacity-0 blur-sm"
-                }`}
-                priority
-                sizes="(max-width: 768px) 100vw, 90vw"
-                onLoad={() => setLightboxImageLoaded(true)}
-              />
-            </motion.div>
+                {/* High-res lightbox image - zoom always wrapped but disabled when not active */}
+                <TransformWrapper
+                  ref={transformRef}
+                  initialScale={1}
+                  minScale={1}
+                  maxScale={4}
+                  doubleClick={{ disabled: !zoomModeActive, mode: "toggle" }}
+                  wheel={{ disabled: true }}
+                  panning={{ disabled: !zoomModeActive }}
+                  pinch={{ disabled: !zoomModeActive }}
+                  velocityAnimation={{ disabled: false }}
+                  onTransformed={(ref, state) => {
+                    if (zoomModeActive) {
+                      setIsZoomed(state.scale > 1.01);
+                    }
+                  }}
+                >
+                  <TransformComponent
+                    wrapperClass="!w-auto !h-auto"
+                    contentClass="!w-auto !h-auto"
+                  >
+                    <Image
+                      src={selectedImage.image}
+                      alt={selectedImage.title}
+                      width={1920}
+                      height={1080}
+                      quality={95}
+                      className={`max-w-full max-h-[70vh] w-auto h-auto object-contain transition-all duration-500 ${
+                        lightboxImageLoaded
+                          ? "opacity-100 blur-0"
+                          : "opacity-0 blur-sm"
+                      }`}
+                      priority
+                      sizes="(max-width: 768px) 100vw, 90vw"
+                      onLoad={() => setLightboxImageLoaded(true)}
+                      draggable={false}
+                    />
+                  </TransformComponent>
+                </TransformWrapper>
+              </motion.div>
+            </AnimatePresence>
 
             {/* Minimal caption */}
             <div className="mt-2 text-white flex items-start justify-between w-full">

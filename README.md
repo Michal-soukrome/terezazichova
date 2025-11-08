@@ -135,10 +135,39 @@ npm start
 
 ## 🎯 Performance Features
 
-- **Image Optimization**: Automatic WebP conversion and responsive images
-- **Lazy Loading**: Images load as they enter the viewport
+- **Image Optimization**: Automatic WebP/AVIF conversion with Next.js Image
+- **Lazy Loading**: Native browser lazy loading for images
+- **Pinch-to-Zoom**: Gesture-based zoom in lightbox view
+- **Smart Gestures**: Intelligent swipe and zoom interaction handling
 - **Static Generation**: Pages are pre-rendered for optimal performance
 - **Bundle Optimization**: Automatic code splitting and tree shaking
+
+## 📚 Documentation
+
+Comprehensive guides are available in the [`/docs/guides`](./docs/guides) folder:
+
+**Architecture & Organization:**
+
+- **[Architecture Guide](./docs/guides/ARCHITECTURE.md)** - Core architectural decisions
+- **[Migration Guide](./docs/guides/MIGRATION_GUIDE.md)** - Feature-based architecture migration
+
+**Image Management:**
+
+- **[Image Optimization](./docs/guides/IMAGE_OPTIMIZATION.md)** - Next.js image optimization best practices
+- **[Image Organization](./docs/guides/IMAGE_ORGANIZATION.md)** - Scalable folder structure
+- **[Image Guide](./docs/guides/IMAGE_GUIDE.md)** - Adding and managing images
+
+**Features & Configuration:**
+
+- **[PWA Guide](./docs/guides/PWA_GUIDE.md)** - Progressive Web App setup
+- **[SEO Guide](./docs/guides/SEO_GUIDE.md)** - SEO optimization strategies
+
+**Project Info:**
+
+- **[Changelog](./CHANGELOG.md)** - Detailed history of all changes
+- **[Project Structure](./PROJECT_STRUCTURE.md)** - Complete file organization
+
+For a complete overview, see the [Documentation Index](./docs/README.md).
 
 ## 📄 License
 
