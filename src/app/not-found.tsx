@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen py-12 lg:py-20 bg-white flex items-center justify-center">
+    <div className="min-h-screen py-6 lg:py-20 bg-white flex items-center justify-center">
       <div className="max-w-md mx-auto px-6 lg:px-8 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

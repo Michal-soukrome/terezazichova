@@ -5,6 +5,11 @@
   --foreground: #171717;
 }
 
+::selection {
+  background-color: #393939;
+  color: #dddddd;
+}
+
 /* Safe area support for modern devices */
 @supports (padding: max(0px)) {
   .safe-area-top {
@@ -84,9 +89,4 @@ h6 {
     linear-gradient(rgba(0, 0, 0, 0.01) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.01) 1px, transparent 1px);
   background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
-}
-
-/* Left-to-right fill animation for SVG */
-.group:hover .group-hover\:animate-fill-left-to-right {
-  clip-path: inset(0 0 0 0) !important;
 }

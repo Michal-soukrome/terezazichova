@@ -86,18 +86,21 @@ const Sidebar = () => {
                     className={`text-xl font-inter font-normal tracking-wide transition-colors p-4 hover:bg-gray-100 duration-300 relative block group ${
                       pathname === item.href
                         ? "text-black"
-                        : "text-gray-600 hover:text-black"
+                        : "text-gray-400 hover:text-gray-700"
                     }`}
                   >
                     {item.name}
                     {pathname === item.href && (
                       <motion.div
                         layoutId="sidebar-active"
-                        className="absolute -right-8 top-0 bottom-0 w-0.75 bg-gray-400"
+                        className="absolute -right-8 top-0 bottom-0 w-0.75 bg-gray-700"
                         initial={false}
                       />
                     )}
-                    <span className="absolute -right-8 top-0 bottom-0 w-0.75 bg-gray-300 scale-y-0 group-hover:scale-y-100 transition-transform origin-top duration-300" />
+                    {/* Only show hover indicator when NOT active */}
+                    {pathname !== item.href && (
+                      <span className="absolute -right-8 top-0 bottom-0 w-0.75 bg-gray-300 scale-y-0 group-hover:scale-y-100 transition-transform origin-top duration-300" />
+                    )}
                   </SidebarLink>
                 </li>
               ))}
@@ -162,7 +165,7 @@ const Sidebar = () => {
 
             {/* Mobile menu button */}
             <button
-              className="text-gray-600 hover:text-black transition-colors relative z-50"
+              className="text-gray-600 transition-colors relative z-50"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -170,9 +173,7 @@ const Sidebar = () => {
                 animate={{ rotate: isMenuOpen ? 90 : 0 }}
                 transition={{ duration: 0.2 }}
               >
-                {isMenuOpen ? (
-                  <X size={24} />
-                ) : (
+                {isMenuOpen ? null : (
                   <AlignEndVertical className="animate-bounce" size={24} />
                 )}
               </motion.div>
@@ -216,7 +217,7 @@ const Sidebar = () => {
                     </h1>
                     <button
                       onClick={() => setIsMenuOpen(false)}
-                      className=" text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+                      className=" text-gray-400 "
                       aria-label="Close menu"
                     >
                       <X size={20} />
@@ -233,7 +234,7 @@ const Sidebar = () => {
                         initial={{ opacity: 0, x: 50 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{
-                          delay: index * 0.3,
+                          delay: index * 0.2,
                           duration: 0.3,
                         }}
                       >

@@ -181,9 +181,9 @@ const groupExhibitions = [
 
 export default function Exhibitions() {
   return (
-    <div className="min-h-screen py-12 lg:py-20 bg-white">
+    <div className="min-h-screen py-6 lg:py-20 bg-white">
       <div className="absolute inset-0 pointer-events-none opacity-75 bg-dot-pattern"></div>
-      <div className="max-w-11/12 md:max-w-9/12  mx-auto px-3 lg:px-8 relative z-10">
+      <div className="max-w-11/12 md:max-w-9/12  mx-auto px-3 lg:px-8 relative z-10 cursor-default">
         {/* Education Section */}
         <motion.section
           initial={{ opacity: 0, y: 30 }}
@@ -191,9 +191,9 @@ export default function Exhibitions() {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="mb-16"
         >
-          <h2 className="font-poppins text-2xl md:text-3xl font-medium tracking-tight text-black mb-8 border-b border-black pb-4">
+          <h3 className="font-poppins text-2xl md:text-3xl font-medium tracking-tight text-black mb-8 border-b border-gray-400 pb-4">
             Studia
-          </h2>
+          </h3>
           <div className="space-y-6">
             {educationData.map((item, index) => (
               <motion.div
@@ -228,9 +228,9 @@ export default function Exhibitions() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="mb-20"
         >
-          <h2 className="font-poppins text-2xl md:text-3xl font-medium tracking-tight text-black mb-8 border-b border-black pb-4">
+          <h3 className="font-poppins text-2xl md:text-3xl font-medium tracking-tight text-black mb-8 border-b border-gray-400 pb-4">
             Samostatné výstavy
-          </h2>
+          </h3>
           <div className="space-y-8">
             {soloExhibitions.map((yearGroup, yearIndex) => (
               <motion.div
@@ -270,9 +270,9 @@ export default function Exhibitions() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.7 }}
         >
-          <h2 className="font-poppins text-2xl md:text-3xl font-medium tracking-tight text-black mb-8 border-b border-black pb-4">
+          <h3 className="font-poppins text-2xl md:text-3xl font-medium tracking-tight text-black mb-8 border-b border-gray-400 pb-4">
             Skupinové výstavy
-          </h2>
+          </h3>
           <div className="space-y-4">
             {groupExhibitions.map((exhibition, index) => (
               <motion.div
