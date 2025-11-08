@@ -187,23 +187,21 @@ export default function Home() {
 
   // Show filter bar on scroll or after delay
   useEffect(() => {
-    // Option 1: Show immediately after a delay (uncomment to use)
+    // Option 1: Show immediately after a delay (current)
     const timer = setTimeout(() => setShowFilterBar(true), 2000);
     return () => clearTimeout(timer);
 
-    // Option 2: Show on scroll (current - adjust threshold below)
+    // Option 2: Show on scroll (commented out)
     // const SCROLL_THRESHOLD = 100; // Adjust this value (in pixels)
-
-    const handleScroll = () => {
-      if (window.scrollY > SCROLL_THRESHOLD) {
-        setShowFilterBar(true);
-      } else {
-        setShowFilterBar(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    // const handleScroll = () => {
+    //   if (window.scrollY > SCROLL_THRESHOLD) {
+    //     setShowFilterBar(true);
+    //   } else {
+    //     setShowFilterBar(false);
+    //   }
+    // };
+    // window.addEventListener("scroll", handleScroll);
+    // return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Disable body scroll when lightbox is open
