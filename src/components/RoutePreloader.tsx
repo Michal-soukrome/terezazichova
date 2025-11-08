@@ -60,7 +60,7 @@ const RoutePreloader = () => {
               transition={{ delay: 0.1 }}
               className="text-gray-500 font-light text-sm tracking-wide"
             >
-              Loading
+              Načítám...
             </motion.p>
           </div>
         </motion.div>

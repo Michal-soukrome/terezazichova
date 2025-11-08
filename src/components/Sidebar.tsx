@@ -52,8 +52,8 @@ const Sidebar = () => {
 
   const menuItems = [
     { name: "Úvod", href: "/" },
-    { name: "Výstavy", href: "/vystavy" },
-    { name: "Tereza", href: "/ja" },
+    { name: "CV", href: "/cv" },
+    { name: "Tvorba", href: "/tvorba" },
   ];
 
   return (

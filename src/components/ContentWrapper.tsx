@@ -34,9 +34,7 @@ const ContentWrapper = ({ children }: ContentWrapperProps) => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
                 className="text-gray-500 font-light text-sm tracking-wide"
-              >
-                Loading
-              </motion.p>
+              ></motion.p>
             </div>
           </motion.div>
         )}

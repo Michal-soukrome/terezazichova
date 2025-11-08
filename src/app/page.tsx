@@ -239,7 +239,7 @@ export default function Home() {
       <div className="max-w-11/12 mx-auto px-3 lg:px-8 relative z-10">
         {/* Masonry-style grid */}
         <motion.div
-          className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4"
+          className="columns-1 gap-4 space-y-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
@@ -393,10 +393,11 @@ export default function Home() {
             </motion.div>
 
             {/* Minimal caption with image counter */}
-            <div className="px-4 mt-2 text-white flex items-start justify-between w-full">
+            <div className="mt-2 text-white flex items-start justify-between w-full">
               <div>
-                <h3 className="text-xl font-light">{selectedImage.title}</h3>
-                <p className="text-gray-300">{selectedImage.year}</p>
+                <h3 className="text-base font-light">{selectedImage.title}</h3>
+                <p className="text-xs text-gray-300">{selectedImage.year}</p>
+                {/* 
                 {selectedImage.medium && (
                   <p className="text-sm text-gray-400">
                     {selectedImage.medium}
@@ -406,13 +407,15 @@ export default function Home() {
                   <p className="text-sm text-gray-400">
                     {selectedImage.dimensions}
                   </p>
-                )}
+                )}*/}
               </div>
+              {/* 
               <div>
                 <p className="text-sm text-gray-400">
                   {selectedImageIndex! + 1} / {filteredArtworks.length}
                 </p>
               </div>
+              */}
             </div>
           </div>
         </motion.div>
@@ -440,7 +443,7 @@ export default function Home() {
                     e.target.value ? parseInt(e.target.value) : null
                   )
                 }
-                className={`cursor-pointer px-4 py-2.5 pr-8 text-sm border border-gray-200/60 rounded-2xl bg-white/60 backdrop-blur hover:bg-white/80 hover:border-gray-300 transition-all focus:ring-2 focus:ring-gray-400 focus:outline-none font-inter shadow-sm ${
+                className={`cursor-pointer px-4 py-2.5 pr-8 text-sm border border-gray-200/60 rounded-2xl bg-white/60 backdrop-blur hover:bg-white/80 hover:border-gray-300 transition-all  focus:outline-none font-inter shadow-sm ${
                   isMobile ? "w-28" : "w-auto"
                 }`}
               >
@@ -464,7 +467,7 @@ export default function Home() {
               )}
             </div>
 
-            {/* Category Filter */}
+            {/* Category Filter 
             <div className="relative">
               <select
                 value={selectedCategory}
@@ -490,14 +493,15 @@ export default function Home() {
                 </div>
               )}
             </div>
+            */}
 
             {/* Exhibition Filter */}
             <div className="relative">
               <select
                 value={selectedExhibition}
                 onChange={(e) => setSelectedExhibition(e.target.value)}
-                className={`cursor-pointer px-4 py-2.5 pr-8 text-sm border border-gray-200/60 rounded-2xl bg-white/60 backdrop-blur hover:bg-white/80 hover:border-gray-300 transition-all focus:ring-2 focus:ring-gray-400 focus:outline-none font-inter shadow-sm ${
-                  isMobile ? "w-24" : "w-auto"
+                className={`cursor-pointer px-4 py-2.5 pr-8 text-sm border border-gray-200/60 rounded-2xl bg-white/60 backdrop-blur hover:bg-white/80 hover:border-gray-300 transition-all  focus:outline-none font-inter shadow-sm ${
+                  isMobile ? "w-full" : "w-auto"
                 }`}
               >
                 <option value="all">Kde?</option>

@@ -36,6 +36,19 @@ const educationData = [
 
 const soloExhibitions = [
   {
+    year: "2025",
+    exhibitions: [
+      {
+        title: "Under Her Skin, Praha",
+        venue: "Galerie Vltavín, Praha",
+      },
+      {
+        title: "Podivuhodné pondělí",
+        venue: "Městské muzeum Jaroměř, Jaroměř",
+      },
+    ],
+  },
+  {
     year: "2024",
     exhibitions: [
       {
@@ -91,6 +104,16 @@ const soloExhibitions = [
 ];
 
 const groupExhibitions = [
+  {
+    year: "2025",
+    title: "GHMP – Galerie hlavního města Prahy",
+    venue: "Palác volného času, zámek Troja, Praha",
+  },
+  {
+    year: "2025",
+    title: "V říši",
+    venue: "Galerie moderního umění v Hradci Králové",
+  },
   {
     year: "2024",
     title: "Sprizneni volbou Michael Rittstein a Roman Franta a jejich žáci",
@@ -183,50 +206,12 @@ export default function Exhibitions() {
   return (
     <div className="min-h-screen py-6 lg:py-20 bg-white">
       <div className="absolute inset-0 pointer-events-none opacity-75 bg-dot-pattern"></div>
-      <div className="max-w-11/12 md:max-w-9/12  mx-auto px-3 lg:px-8 relative z-10 cursor-default">
-        {/* Education Section */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="mb-16"
-        >
-          <h3 className="font-poppins text-2xl md:text-3xl font-medium tracking-tight text-black mb-8 border-b border-gray-400 pb-4">
-            Studia
-          </h3>
-          <div className="space-y-6">
-            {educationData.map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
-                className="flex flex-col md:flex-row md:items-start gap-4 py-4 border-l-2 border-gray-100 pl-6"
-              >
-                <div className="md:w-32 flex-shrink-0">
-                  <span className="text-sm font-medium text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
-                    {item.years}
-                  </span>
-                </div>
-                <div className="flex-grow">
-                  <h3 className="font-medium text-gray-900 mb-1">
-                    {item.institution}
-                  </h3>
-                  {item.detail && (
-                    <p className="text-gray-600 text-sm">{item.detail}</p>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.section>
-
+      <div className="max-w-11/12 md:max-w-9/12  mx-auto px-3 lg:px-8 relative z-10 cursor-default space-y-16">
         {/* Solo Exhibitions Section */}
         <motion.section
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="mb-20"
         >
           <h3 className="font-poppins text-2xl md:text-3xl font-medium tracking-tight text-black mb-8 border-b border-gray-400 pb-4">
             Samostatné výstavy
@@ -294,6 +279,42 @@ export default function Exhibitions() {
                   <p className="text-gray-600 text-sm italic">
                     {exhibition.venue}
                   </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* Education Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
+          <h3 className="font-poppins text-2xl md:text-3xl font-medium tracking-tight text-black mb-8 border-b border-gray-400 pb-4">
+            Studia
+          </h3>
+          <div className="space-y-6">
+            {educationData.map((item, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
+                className="flex flex-col md:flex-row md:items-start gap-4 py-4 border-l-2 border-gray-100 pl-6"
+              >
+                <div className="md:w-32 flex-shrink-0">
+                  <span className="text-sm font-medium text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
+                    {item.years}
+                  </span>
+                </div>
+                <div className="flex-grow">
+                  <h3 className="font-medium text-gray-900 mb-1">
+                    {item.institution}
+                  </h3>
+                  {item.detail && (
+                    <p className="text-gray-600 text-sm">{item.detail}</p>
+                  )}
                 </div>
               </motion.div>
             ))}

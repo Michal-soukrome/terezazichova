@@ -115,7 +115,9 @@ const ImageGallery = ({ artworks }: ImageGalleryProps) => {
               />
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6 text-white rounded-b-lg">
                 <h2 className="text-xl font-bold">{selectedImage.title}</h2>
-                <p className="text-gray-300">{selectedImage.description}</p>
+                <p className=" text-xs text-gray-300">
+                  {selectedImage.description}
+                </p>
                 <p className="text-sm text-gray-400 mt-2">
                   {selectedImage.category} • {selectedImage.year}
                 </p>
