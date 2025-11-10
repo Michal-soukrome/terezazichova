@@ -360,14 +360,14 @@ export default function TvorbaPage() {
           className="columns-1 gap-4 space-y-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
         >
           {filteredItems.map((item, index) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              transition={{ duration: 0.4, delay: index * 0.08 }}
               className="break-inside-avoid cursor-pointer group relative overflow-hidden rounded-lg"
               onClick={() => {
                 setSelectedImageIndex(index);
@@ -381,15 +381,20 @@ export default function TvorbaPage() {
                 width={600}
                 height={800}
                 className={`w-full h-auto object-cover transition-all duration-300 group-hover:scale-105 ${
-                  imageLoadStates[index] ? "opacity-100" : "opacity-0"
+                  index === 0
+                    ? "opacity-100"
+                    : imageLoadStates[index]
+                    ? "opacity-100"
+                    : "opacity-0"
                 }`}
-                priority={index < 6}
-                loading={index < 6 ? "eager" : "lazy"}
-                fetchPriority={index < 3 ? "high" : "auto"}
+                priority={index === 0}
+                loading={index === 0 ? "eager" : "lazy"}
+                fetchPriority={index === 0 ? "high" : "auto"}
                 onLoad={() => handleImageLoad(index)}
                 placeholder="blur"
                 blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                quality={index === 0 ? 90 : 75}
               />
             </motion.div>
           ))}

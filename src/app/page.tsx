@@ -273,33 +273,19 @@ export default function Home() {
       {/* Subtle grid background */}
       <div className="absolute inset-0 pointer-events-none opacity-75 bg-blueprint-pattern"></div>
       <div className="max-w-11/12 mx-auto px-3 lg:px-8 relative z-10">
-        {/* Hidden preload images for lightbox - loads in background */}
-        <div className="hidden" aria-hidden="true">
-          {filteredArtworks.slice(0, 10).map((artwork, index) => (
-            <Image
-              key={`preload-${artwork.id}`}
-              src={artwork.image}
-              alt=""
-              width={1920}
-              height={1080}
-              priority={index < 3}
-            />
-          ))}
-        </div>
-
         {/* Masonry-style grid */}
         <motion.div
           className="columns-1 gap-4 space-y-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
         >
           {filteredArtworks.map((artwork, index) => (
             <motion.div
               key={artwork.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.25 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
               className="break-inside-avoid mb-4 group cursor-pointer border border-gray-100"
               onClick={() => {
                 setLightboxImageLoaded(false);
@@ -314,15 +300,20 @@ export default function Home() {
                   width={600}
                   height={800}
                   className={`w-full h-auto object-cover transition-all duration-700 group-hover:scale-105 ${
-                    imageLoadStates[index] ? "opacity-100" : "opacity-0"
+                    index === 0
+                      ? "opacity-100"
+                      : imageLoadStates[index]
+                      ? "opacity-100"
+                      : "opacity-0"
                   }`}
-                  priority={index < 4}
-                  loading={index < 4 ? "eager" : "lazy"}
+                  priority={index === 0}
+                  loading={index === 0 ? "eager" : "lazy"}
                   onLoad={() => handleImageLoad(index)}
                   placeholder="blur"
                   blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  fetchPriority={index < 3 ? "high" : "auto"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                  quality={index === 0 ? 90 : 75}
                 />
 
                 {/* Minimal overlay on hover */}
