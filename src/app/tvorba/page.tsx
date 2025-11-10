@@ -259,8 +259,8 @@ export default function TvorbaPage() {
   const [touchEndY, setTouchEndY] = useState<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    // Only handle touch if zoom mode is NOT active
-    if (zoomModeActive) return;
+    // Only handle touch if zoom mode is NOT active or on desktop
+    if (zoomModeActive || !isMobile) return;
 
     setTouchEndX(null);
     setTouchEndY(null);
@@ -269,8 +269,8 @@ export default function TvorbaPage() {
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    // Only handle touch if zoom mode is NOT active
-    if (zoomModeActive) return;
+    // Only handle touch if zoom mode is NOT active or on desktop
+    if (zoomModeActive || !isMobile) return;
 
     setTouchEndX(e.targetTouches[0].clientX);
     setTouchEndY(e.targetTouches[0].clientY);
@@ -287,7 +287,8 @@ export default function TvorbaPage() {
   };
 
   const handleTouchEnd = () => {
-    // Only handle touch if zoom mode is NOT active
+    // Only handle touch if zoom mode is NOT active or on desktop
+    if (zoomModeActive || !isMobile) return;
     if (zoomModeActive) return;
 
     if (!touchStartX || !touchStartY || !touchEndX || !touchEndY) return;
@@ -402,7 +403,6 @@ export default function TvorbaPage() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
-          onClick={() => setSelectedImageIndex(null)}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -471,8 +471,8 @@ export default function TvorbaPage() {
               </button>
             </div>
 
-            {/* Navigation buttons - only show if multiple images */}
-            {filteredItems.length > 1 && (
+            {/* Navigation buttons - only show if multiple images and zoom mode is not active */}
+            {filteredItems.length > 1 && !zoomModeActive && (
               <>
                 <button
                   onClick={(e) => {
@@ -518,7 +518,22 @@ export default function TvorbaPage() {
                   duration: 0.4,
                   ease: [0.4, 0, 0.2, 1],
                 }}
-                className="relative max-w-7xl max-h-full"
+                drag={!zoomModeActive && filteredItems.length > 1 ? "x" : false}
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.2}
+                onDragEnd={(e, { offset, velocity }) => {
+                  const swipe = Math.abs(offset.x) * velocity.x;
+                  if (swipe < -10000) {
+                    navigateToNext();
+                  } else if (swipe > 10000) {
+                    navigateToPrevious();
+                  }
+                }}
+                className={`relative max-w-7xl max-h-full ${
+                  !zoomModeActive && filteredItems.length > 1
+                    ? "cursor-grab active:cursor-grabbing"
+                    : ""
+                }`}
               >
                 {!lightboxImageLoaded && (
                   <Image
@@ -538,7 +553,7 @@ export default function TvorbaPage() {
                     minScale={1}
                     maxScale={4}
                     doubleClick={{ disabled: false, mode: "toggle" }}
-                    wheel={{ disabled: true }}
+                    wheel={{ disabled: false }}
                     panning={{ disabled: false }}
                     pinch={{ disabled: false }}
                     velocityAnimation={{ disabled: false }}

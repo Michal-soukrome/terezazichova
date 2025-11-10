@@ -180,8 +180,8 @@ export default function Home() {
   const minSwipeDownDistance = 100;
 
   const onTouchStart = (e: React.TouchEvent) => {
-    // Only handle touch if zoom mode is NOT active
-    if (zoomModeActive) return;
+    // Only handle touch if zoom mode is NOT active or on desktop
+    if (zoomModeActive || !isMobile) return;
 
     setTouchEnd(null);
     setTouchStart({
@@ -193,8 +193,8 @@ export default function Home() {
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    // Only handle touch if zoom mode is NOT active
-    if (zoomModeActive || !touchStart) return;
+    // Only handle touch if zoom mode is NOT active or on desktop
+    if (zoomModeActive || !isMobile || !touchStart) return;
 
     const currentY = e.targetTouches[0].clientY;
     const currentX = e.targetTouches[0].clientX;
@@ -211,8 +211,8 @@ export default function Home() {
   };
 
   const onTouchEnd = () => {
-    // Only handle touch if zoom mode is NOT active
-    if (zoomModeActive) return;
+    // Only handle touch if zoom mode is NOT active or on desktop
+    if (zoomModeActive || !isMobile) return;
 
     if (!touchStart || !touchEnd) {
       setSwipeDownOffset(0);
@@ -350,7 +350,6 @@ export default function Home() {
           }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center"
-          onClick={() => setSelectedImageIndex(null)}
         >
           {/* Zoom controls with feedback */}
           <div className="w-full px-4 absolute top-4 left-0 flex items-start justify-between">
@@ -410,8 +409,8 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Navigation buttons - only show if multiple images */}
-          {filteredArtworks.length > 1 && (
+          {/* Navigation buttons - only show if multiple images and zoom mode is not active */}
+          {filteredArtworks.length > 1 && !zoomModeActive && (
             <>
               <button
                 onClick={(e) => {
@@ -471,7 +470,24 @@ export default function Home() {
                   duration: 0.4,
                   ease: [0.4, 0, 0.2, 1],
                 }}
-                className="relative"
+                drag={
+                  !zoomModeActive && filteredArtworks.length > 1 ? "x" : false
+                }
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.2}
+                onDragEnd={(e, { offset, velocity }) => {
+                  const swipe = Math.abs(offset.x) * velocity.x;
+                  if (swipe < -10000) {
+                    navigateToNext();
+                  } else if (swipe > 10000) {
+                    navigateToPrevious();
+                  }
+                }}
+                className={`relative ${
+                  !zoomModeActive && filteredArtworks.length > 1
+                    ? "cursor-grab active:cursor-grabbing"
+                    : ""
+                }`}
               >
                 {/* Blurred placeholder while loading */}
                 {!lightboxImageLoaded && (
@@ -494,7 +510,7 @@ export default function Home() {
                   minScale={1}
                   maxScale={4}
                   doubleClick={{ disabled: !zoomModeActive, mode: "toggle" }}
-                  wheel={{ disabled: true }}
+                  wheel={{ disabled: !zoomModeActive }}
                   panning={{ disabled: !zoomModeActive }}
                   pinch={{ disabled: !zoomModeActive }}
                   velocityAnimation={{ disabled: false }}
@@ -531,7 +547,7 @@ export default function Home() {
 
             {/* Minimal caption */}
             <div className="mt-2 text-white flex items-start justify-between w-full">
-              <div>
+              <div className="px-2">
                 <h3 className="text-base font-light">{selectedImage.title}</h3>
                 <p className="text-xs text-gray-300">{selectedImage.year}</p>
               </div>
